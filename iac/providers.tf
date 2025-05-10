@@ -9,7 +9,6 @@ terraform {
   # local
   backend "local" {}
 
-
   ## remote
   #backend "s3" {  
   #  bucket       = "tfstate-${terraform.workspace}"
@@ -18,4 +17,14 @@ terraform {
   #  encrypt      = true  
   #  use_lockfile = true 
   #}  
+}
+
+provider "aws" {
+  region = var.region
+
+  default_tags {
+    tags = {
+      Environment = "${terraform.workspace}"
+    }
+  }
 }
