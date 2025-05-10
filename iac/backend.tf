@@ -1,7 +1,11 @@
-module "backend" {
-  source = "terraform-aws-modules/s3-bucket/aws"
+resource "random_id" "server" {
+  byte_length = 4
+}
 
-  bucket = "tfstate-${terraform.workspace}"
+module "backend" {
+  source = "./modules/terraform-aws-s3-bucket"
+
+  bucket = "tfstate-${terraform.workspace}-${random_id.server.hex}"
   acl    = "private"
 
   control_object_ownership = true
