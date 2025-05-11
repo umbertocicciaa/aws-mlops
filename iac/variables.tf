@@ -359,6 +359,26 @@ variable "eventbridge_config" {
   default = {}
 }
 
+variable "vpc_endpoints_config" {
+  description = "Vpc endpoints configurations."
+  type = map(object({
+    create                     = optional(bool, true)
+    vpc_id                     = optional(string, null)
+    endpoints                  = optional(any, {})
+    security_group_ids         = optional(list(string), [])
+    subnet_ids                 = optional(list(string), [])
+    tags                       = optional(map(string), {})
+    create_security_group      = optional(bool, false)
+    security_group_name        = optional(string, null)
+    security_group_name_prefix = optional(string, null)
+    security_group_description = optional(string, null)
+    security_group_rules       = optional(any, {})
+    security_group_tags        = optional(map(string), {})
+    route_table_ids            = optional(list(string), [])
+  }))
+  default = {}
+}
+
 variable "sagemaker_config" {
   description = "SageMaker configurations."
   type        = object({})
