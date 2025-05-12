@@ -71,8 +71,24 @@ module "aws_glue_crawler" {
   source   = "./modules/terraform-aws-glue/modules/glue-crawler"
   for_each = var.glue_crawler_config
 
-  database_name = each.value.database_name
-  role          = each.value.role
+  database_name          = each.value.database_name
+  role                   = each.value.role
+  crawler_name           = each.value.crawler_name
+  crawler_description    = each.value.crawler_description
+  schedule               = each.value.schedule
+  classifiers            = each.value.classifiers
+  configuration          = each.value.configuration
+  jdbc_target            = each.value.jdbc_target
+  dynamodb_target        = each.value.dynamodb_target
+  s3_target              = each.value.s3_target
+  mongodb_target         = each.value.mongodb_target
+  catalog_target         = each.value.catalog_target
+  delta_target           = each.value.delta_target
+  table_prefix           = each.value.table_prefix
+  security_configuration = each.value.security_configuration
+  schema_change_policy   = each.value.schema_change_policy
+  lineage_configuration  = each.value.lineage_configuration
+  recrawl_policy         = each.value.recrawl_policy
 }
 
 module "aws_glue_catalog" {
@@ -86,8 +102,22 @@ module "aws_glue_etl_job" {
   source   = "./modules/terraform-aws-glue/modules/glue-job"
   for_each = var.glue_job_config
 
-  command  = each.value.command
-  role_arn = each.value.role_arn
+  command                   = each.value.command
+  role_arn                  = each.value.role_arn
+  job_name                  = each.value.job_name
+  job_description           = each.value.job_description
+  connections               = each.value.connections
+  glue_version              = each.value.glue_version
+  default_arguments         = each.value.default_arguments
+  non_overridable_arguments = each.value.non_overridable_arguments
+  security_configuration    = each.value.security_configuration
+  timeout                   = each.value.timeout
+  max_capacity              = each.value.max_capacity
+  max_retries               = each.value.max_retries
+  worker_type               = each.value.worker_type
+  number_of_workers         = each.value.number_of_workers
+  execution_property        = each.value.execution_property
+  notification_property     = each.value.notification_property
 }
 
 # events
