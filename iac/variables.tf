@@ -138,7 +138,7 @@ variable "glue_crawler_config" {
 
 variable "glue_job_config" {
   description = "Glue job configurations."
-  type = object({
+  type = map(object({
     job_name                  = optional(string)
     job_description           = optional(string)
     role_arn                  = string
@@ -168,13 +168,13 @@ variable "glue_job_config" {
     notification_property = optional(object({
       notify_delay_after = number
     }))
-  })
+  }))
   default = {}
 }
 
 variable "glue_catalog_config" {
   description = "Glue catalog configurations."
-  type = object({
+  type = map(object({
     catalog_table_name        = optional(string)
     catalog_table_description = optional(string)
     database_name             = string
@@ -267,7 +267,7 @@ variable "glue_catalog_config" {
     #    # Whether the table data is stored in subdirectories
     #    stored_as_sub_directories = bool
     #  })
-  })
+  }))
   default = {}
 }
 
@@ -351,7 +351,6 @@ variable "eventbridge_config" {
     trusted_entities         = optional(list(string), [])
     policy_json              = optional(string, null)
     policy_jsons             = optional(list(string), [])
-    policy_jsons             = optional(string, null)
     policies                 = optional(list(string), [])
     policy_statements        = optional(any, {})
 
