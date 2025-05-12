@@ -175,32 +175,32 @@ variable "glue_job_config" {
 variable "glue_catalog_config" {
   description = "Glue catalog configurations."
   type = map(object({
-    catalog_table_name        = optional(string)
-    catalog_table_description = optional(string)
+    catalog_table_name        = optional(string, null)
+    catalog_table_description = optional(string, null)
     database_name             = string
-    catalog_id                = optional(string)
-    owner                     = optional(string)
-    parameters                = optional(map(string))
+    catalog_id                = optional(string, null)
+    owner                     = optional(string, null)
+    parameters                = optional(map(string), null)
     partition_index = optional(object({
       index_name = string
       keys       = list(string)
-    }))
+    }), null)
     partition_keys = optional(map(any), {})
     #  type = object({
     #    comment = string
     #    name    = string
     #    type    = string
     #  })
-    retention  = optional(number)
-    table_type = optional(string)
+    retention  = optional(number, null)
+    table_type = optional(string, null)
     target_table = optional(object({
       catalog_id    = string
       database_name = string
       name          = string
-    }))
-    view_expanded_text = optional(string)
-    view_original_text = optional(string)
-    storage_descriptor = optional(any)
+    }), null)
+    view_expanded_text = optional(string, null)
+    view_original_text = optional(string, null)
+    storage_descriptor = optional(any, null)
     #  type = object({
     #    # List of reducer grouping columns, clustering columns, and bucketing columns in the table
     #    bucket_columns = list(string)

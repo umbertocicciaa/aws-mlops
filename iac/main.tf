@@ -95,7 +95,20 @@ module "aws_glue_catalog" {
   source   = "./modules/terraform-aws-glue/modules/glue-catalog-table"
   for_each = var.glue_catalog_config
 
-  database_name = each.value.database_name
+  catalog_table_name        = each.value.catalog_table_name
+  catalog_table_description = each.value.catalog_table_description
+  database_name             = each.value.database_name
+  catalog_id                = each.value.catalog_id
+  owner                     = each.value.owner
+  parameters                = each.value.parameters
+  partition_index           = each.value.partition_index
+  partition_keys            = each.value.partition_keys
+  retention                 = each.value.retention
+  table_type                = each.value.table_type
+  target_table              = each.value.target_table
+  view_expanded_text        = each.value.view_expanded_text
+  view_original_text        = each.value.view_original_text
+  storage_descriptor        = each.value.storage_descriptor
 }
 
 module "aws_glue_etl_job" {
