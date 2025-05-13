@@ -304,6 +304,72 @@ variable "glue_catalog_config" {
   default = {}
 }
 
+variable "glue_catalog_database_config" {
+  description = "Glue catalog database configurations."
+  type = map(object({
+    catalog_database_name           = optional(string, null)
+    catalog_database_description    = optional(string, null)
+    catalog_id                      = optional(string, null)
+    create_table_default_permission = optional(any, null)
+    location_uri                    = optional(string, null)
+    parameters                      = optional(map(string), null)
+    target_database = optional(object({
+      catalog_id    = string
+      database_name = string
+    }), null)
+  }))
+  default = {}
+}
+
+variable "glue_workflow_config" {
+  description = "Glue workflow configurations."
+  type = map(object({
+    workflow_name          = optional(string, null)
+    workflow_description   = optional(string, null)
+    default_run_properties = optional(map(string), null)
+    max_concurrent_runs    = optional(number, null)
+  }))
+  default = {}
+}
+
+variable "iam_role_config" {
+  type = map(object({
+    trusted_role_actions              = optional(list(string), ["sts:AssumeRole", "sts:TagSession"])
+    trusted_role_arns                 = optional(list(string), [])
+    trusted_role_services             = optional(list(string), [])
+    trust_policy_conditions           = optional(list(string), [])
+    mfa_age                           = optional(number, 86400)
+    max_session_duration              = optional(number, 3600)
+    create_role                       = optional(bool, false)
+    create_instance_profile           = optional(bool, false)
+    role_name                         = optional(string, null)
+    role_name_prefix                  = optional(string, null)
+    role_path                         = optional(string, "/")
+    role_requires_mfa                 = optional(bool, true)
+    role_permissions_boundary_arn     = optional(string, "")
+    tags                              = optional(map(string), {})
+    custom_role_policy_arns           = optional(list(string), [])
+    custom_role_trust_policy          = optional(string, "")
+    create_custom_role_trust_policy   = optional(bool, false)
+    number_of_custom_role_policy_arns = optional(number, null)
+    inline_policy_statements          = optional(any, [])
+    admin_role_policy_arn             = optional(string, "arn:aws:iam::aws:policy/AdministratorAccess")
+    poweruser_role_policy_arn         = optional(string, "arn:aws:iam::aws:policy/PowerUserAccess")
+    readonly_role_policy_arn          = optional(string, "arn:aws:iam::aws:policy/ReadOnlyAccess")
+    attach_admin_policy               = optional(bool, false)
+    attach_poweruser_policy           = optional(bool, false)
+    attach_readonly_policy            = optional(bool, false)
+    force_detach_policies             = optional(bool, false)
+    role_description                  = optional(string, "")
+    role_sts_externalid               = optional(any, [])
+    allow_self_assume_role            = optional(bool, false)
+    role_requires_session_name        = optional(bool, false)
+    role_session_name                 = optional(list(string), ["$${aws:username}"])
+  }))
+  description = "IAM role configurations."
+  default     = {}
+}
+
 variable "eventbridge_config" {
   description = "S3 bucket configurations."
   type = map(object({

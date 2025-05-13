@@ -123,7 +123,7 @@ module "aws_glue_crawler" {
   recrawl_policy         = each.value.recrawl_policy
 }
 
-module "aws_glue_catalog" {
+module "aws_glue_catalog_table" {
   source   = "./modules/terraform-aws-glue/modules/glue-catalog-table"
   for_each = var.glue_catalog_config
 
@@ -143,7 +143,7 @@ module "aws_glue_catalog" {
   storage_descriptor        = each.value.storage_descriptor
 }
 
-module "aws_glue_etl_job" {
+module "aws_glue_job" {
   source   = "./modules/terraform-aws-glue/modules/glue-job"
   for_each = var.glue_job_config
 
@@ -163,6 +163,68 @@ module "aws_glue_etl_job" {
   number_of_workers         = each.value.number_of_workers
   execution_property        = each.value.execution_property
   notification_property     = each.value.notification_property
+}
+
+module "glue_catalog_database" {
+  source   = "./modules/terraform-aws-glue/modules/glue-catalog-database"
+  for_each = var.glue_catalog_database_config
+
+  catalog_database_name           = each.value.catalog_database_name
+  catalog_database_description    = each.value.catalog_database_description
+  catalog_id                      = each.value.catalog_id
+  create_table_default_permission = each.value.create_table_default_permission
+  location_uri                    = each.value.location_uri
+  parameters                      = each.value.parameters
+  target_database                 = each.value.target_database
+}
+
+module "iam_role" {
+  source   = "./modules/terraform-aws-iam/modules/iam-assumable-role"
+  for_each = var.iam_role_config
+
+  trusted_role_actions              = each.value.trusted_role_actions
+  trusted_role_arns                 = each.value.trusted_role_arns
+  trusted_role_services             = each.value.trusted_role_services
+  trust_policy_conditions           = each.value.trust_policy_conditions
+  mfa_age                           = each.value.mfa_age
+  max_session_duration              = each.value.max_session_duration
+  create_role                       = each.value.create_role
+  create_instance_profile           = each.value.create_instance_profile
+  role_name                         = each.value.role_name
+  role_name_prefix                  = each.value.role_name_prefix
+  role_path                         = each.value.role_path
+  role_requires_mfa                 = each.value.role_requires_mfa
+  role_permissions_boundary_arn     = each.value.role_permissions_boundary_arn
+  tags                              = each.value.tags
+  custom_role_policy_arns           = each.value.custom_role_policy_arns
+  custom_role_trust_policy          = each.value.custom_role_trust_policy
+  create_custom_role_trust_policy   = each.value.create_custom_role_trust_policy
+  number_of_custom_role_policy_arns = each.value.number_of_custom_role_policy_arns
+  inline_policy_statements          = each.value.inline_policy_statements
+  # Pre-defined policies
+  admin_role_policy_arn      = each.value.admin_role_policy_arn
+  poweruser_role_policy_arn  = each.value.poweruser_role_policy_arn
+  readonly_role_policy_arn   = each.value.readonly_role_policy_arn
+  attach_admin_policy        = each.value.attach_admin_policy
+  attach_poweruser_policy    = each.value.attach_poweruser_policy
+  attach_readonly_policy     = each.value.attach_readonly_policy
+  force_detach_policies      = each.value.force_detach_policies
+  role_description           = each.value.role_description
+  role_sts_externalid        = each.value.role_sts_externalid
+  allow_self_assume_role     = each.value.allow_self_assume_role
+  role_requires_session_name = each.value.role_requires_session_name
+  role_session_name          = each.value.role_session_name
+}
+
+module "glue_workflow" {
+  source   = "./modules/terraform-aws-glue/modules/glue-workflow"
+  for_each = var.glue_workflow_config
+
+  workflow_name          = each.value.workflow_name
+  workflow_description   = each.value.workflow_description
+  default_run_properties = each.value.default_run_properties
+  max_concurrent_runs    = each.value.max_concurrent_runs
+
 }
 
 # events
