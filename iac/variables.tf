@@ -73,6 +73,39 @@ variable "s3_config" {
   default = {}
 }
 
+variable "s3_object_config" {
+  description = "S3 object configurations."
+  type = map(object({
+    create                        = optional(bool, true)
+    bucket                        = optional(string, "")
+    key                           = optional(string, "")
+    file_source                   = optional(string, null)
+    content                       = optional(string, null)
+    content_base64                = optional(string, null)
+    acl                           = optional(string, null)
+    cache_control                 = optional(string, null)
+    content_disposition           = optional(string, null)
+    content_encoding              = optional(string, null)
+    content_language              = optional(string, null)
+    content_type                  = optional(string, null)
+    website_redirect              = optional(string, null)
+    storage_class                 = optional(string, null)
+    etag                          = optional(string, null)
+    server_side_encryption        = optional(string, null)
+    kms_key_id                    = optional(string, null)
+    bucket_key_enabled            = optional(bool, null)
+    metadata                      = optional(map(string), {})
+    tags                          = optional(map(string), {})
+    force_destroy                 = optional(bool, false)
+    object_lock_legal_hold_status = optional(string, null)
+    object_lock_mode              = optional(string, null)
+    object_lock_retain_until_date = optional(string, null)
+    source_hash                   = optional(string, null)
+    override_default_tags         = optional(bool, false)
+  }))
+  default = {}
+}
+
 variable "glue_crawler_config" {
   description = "Glue crawler configurations."
   type = map(object({

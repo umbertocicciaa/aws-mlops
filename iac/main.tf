@@ -66,6 +66,38 @@ module "s3" {
   location_type        = each.value.location_type
 }
 
+module "s3_object" {
+  source   = "./modules/terraform-aws-s3-bucket/modules/object"
+  for_each = var.s3_object_config
+
+  create                        = each.value.create
+  bucket                        = each.value.bucket
+  key                           = each.value.key
+  file_source                   = each.value.file_source
+  content                       = each.value.content
+  content_base64                = each.value.content_base64
+  acl                           = each.value.acl
+  cache_control                 = each.value.cache_control
+  content_disposition           = each.value.content_disposition
+  content_encoding              = each.value.content_encoding
+  content_language              = each.value.content_language
+  content_type                  = each.value.content_type
+  website_redirect              = each.value.website_redirect
+  storage_class                 = each.value.storage_class
+  etag                          = each.value.etag
+  server_side_encryption        = each.value.server_side_encryption
+  kms_key_id                    = each.value.kms_key_id
+  bucket_key_enabled            = each.value.bucket_key_enabled
+  metadata                      = each.value.metadata
+  tags                          = each.value.tags
+  force_destroy                 = each.value.force_destroy
+  object_lock_legal_hold_status = each.value.object_lock_legal_hold_status
+  object_lock_mode              = each.value.object_lock_mode
+  object_lock_retain_until_date = each.value.object_lock_retain_until_date
+  source_hash                   = each.value.source_hash
+  override_default_tags         = each.value.override_default_tags
+}
+
 # Etl Preprocessing
 module "aws_glue_crawler" {
   source   = "./modules/terraform-aws-glue/modules/glue-crawler"
