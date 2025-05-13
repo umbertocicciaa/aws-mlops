@@ -4,6 +4,7 @@ variable "region" {
   default     = "eu-west-3"
 }
 
+# S3 bucket configurations
 variable "s3_config" {
   description = "S3 bucket configurations."
   type = map(object({
@@ -106,6 +107,7 @@ variable "s3_object_config" {
   default = {}
 }
 
+# Glue configurations
 variable "glue_crawler_config" {
   description = "Glue crawler configurations."
   type = map(object({
@@ -332,6 +334,7 @@ variable "glue_workflow_config" {
   default = {}
 }
 
+# IAM role configurations
 variable "iam_role_config" {
   type = map(object({
     trusted_role_actions              = optional(list(string), ["sts:AssumeRole", "sts:TagSession"])
@@ -370,6 +373,7 @@ variable "iam_role_config" {
   default     = {}
 }
 
+# Eventbridge configurations
 variable "eventbridge_config" {
   description = "S3 bucket configurations."
   type = map(object({
@@ -457,6 +461,7 @@ variable "eventbridge_config" {
   default = {}
 }
 
+# VPC configurations
 variable "vpc_endpoints_config" {
   description = "Vpc endpoints configurations."
   type = map(object({
@@ -477,6 +482,7 @@ variable "vpc_endpoints_config" {
   default = {}
 }
 
+# SageMaker configurations
 variable "sagemaker_config" {
   description = "SageMaker configurations."
   type        = object({})
