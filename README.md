@@ -17,10 +17,3 @@ This repository contains resources and examples for implementing MLOps (Machine 
 - Basic knowledge of machine learning and AWS services.
 - Installed AWS CLI and Python environment.
 
-## Contributing
-
-Contributions are welcome! Please read the [CONTRIBUTING.md](CONTRIBUTING.md) file for guidelines.
-
-## License
-
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
