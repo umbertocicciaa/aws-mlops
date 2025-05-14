@@ -16,4 +16,3 @@ This repository contains resources and examples for implementing MLOps (Machine 
 - AWS account with necessary permissions.
 - Basic knowledge of machine learning and AWS services.
 - Installed AWS CLI and Python environment.
-

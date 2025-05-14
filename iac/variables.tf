@@ -110,7 +110,7 @@ variable "s3_object_config" {
 # Glue configurations
 variable "glue_crawler_config" {
   description = "Glue crawler configurations."
-  type = map(object({
+  type = object({
     crawler_name        = optional(string, null)
     crawler_description = optional(string, null)
     database_name       = string
@@ -167,13 +167,16 @@ variable "glue_crawler_config" {
     recrawl_policy = optional(object({
       recrawl_behavior = string
     }))
-  }))
-  default = {}
+  })
+  default = {
+    database_name = ""
+    role          = ""
+  }
 }
 
 variable "glue_job_config" {
   description = "Glue job configurations."
-  type = map(object({
+  type = object({
     job_name                  = optional(string)
     job_description           = optional(string)
     role_arn                  = string
@@ -203,13 +206,16 @@ variable "glue_job_config" {
     notification_property = optional(object({
       notify_delay_after = number
     }))
-  }))
-  default = {}
+  })
+  default = {
+    command  = {}
+    role_arn = ""
+  }
 }
 
-variable "glue_catalog_config" {
+variable "glue_catalog_table_config" {
   description = "Glue catalog configurations."
-  type = map(object({
+  type = object({
     catalog_table_name        = optional(string, null)
     catalog_table_description = optional(string, null)
     database_name             = string
@@ -302,13 +308,15 @@ variable "glue_catalog_config" {
     #    # Whether the table data is stored in subdirectories
     #    stored_as_sub_directories = bool
     #  })
-  }))
-  default = {}
+  })
+  default = {
+    database_name = ""
+  }
 }
 
 variable "glue_catalog_database_config" {
   description = "Glue catalog database configurations."
-  type = map(object({
+  type = object({
     catalog_database_name           = optional(string, null)
     catalog_database_description    = optional(string, null)
     catalog_id                      = optional(string, null)
@@ -319,18 +327,18 @@ variable "glue_catalog_database_config" {
       catalog_id    = string
       database_name = string
     }), null)
-  }))
+  })
   default = {}
 }
 
 variable "glue_workflow_config" {
   description = "Glue workflow configurations."
-  type = map(object({
+  type = object({
     workflow_name          = optional(string, null)
     workflow_description   = optional(string, null)
     default_run_properties = optional(map(string), null)
     max_concurrent_runs    = optional(number, null)
-  }))
+  })
   default = {}
 }
 

@@ -1,3 +1,4 @@
+# S3
 module "s3" {
   source   = "./modules/terraform-aws-s3-bucket"
   for_each = var.s3_config
@@ -100,84 +101,91 @@ module "s3_object" {
 
 # Etl Preprocessing
 module "aws_glue_crawler" {
-  source   = "./modules/terraform-aws-glue/modules/glue-crawler"
-  for_each = var.glue_crawler_config
+  source = "./modules/terraform-aws-glue/modules/glue-crawler"
 
-  database_name          = each.value.database_name
-  role                   = each.value.role
-  crawler_name           = each.value.crawler_name
-  crawler_description    = each.value.crawler_description
-  schedule               = each.value.schedule
-  classifiers            = each.value.classifiers
-  configuration          = each.value.configuration
-  jdbc_target            = each.value.jdbc_target
-  dynamodb_target        = each.value.dynamodb_target
-  s3_target              = each.value.s3_target
-  mongodb_target         = each.value.mongodb_target
-  catalog_target         = each.value.catalog_target
-  delta_target           = each.value.delta_target
-  table_prefix           = each.value.table_prefix
-  security_configuration = each.value.security_configuration
-  schema_change_policy   = each.value.schema_change_policy
-  lineage_configuration  = each.value.lineage_configuration
-  recrawl_policy         = each.value.recrawl_policy
+  database_name          = var.glue_crawler_config.database_name
+  role                   = var.glue_crawler_config.role
+  crawler_name           = var.glue_crawler_config.crawler_name
+  crawler_description    = var.glue_crawler_config.crawler_description
+  schedule               = var.glue_crawler_config.schedule
+  classifiers            = var.glue_crawler_config.classifiers
+  configuration          = var.glue_crawler_config.configuration
+  jdbc_target            = var.glue_crawler_config.jdbc_target
+  dynamodb_target        = var.glue_crawler_config.dynamodb_target
+  s3_target              = var.glue_crawler_config.s3_target
+  mongodb_target         = var.glue_crawler_config.mongodb_target
+  catalog_target         = var.glue_crawler_config.catalog_target
+  delta_target           = var.glue_crawler_config.delta_target
+  table_prefix           = var.glue_crawler_config.table_prefix
+  security_configuration = var.glue_crawler_config.security_configuration
+  schema_change_policy   = var.glue_crawler_config.schema_change_policy
+  lineage_configuration  = var.glue_crawler_config.lineage_configuration
+  recrawl_policy         = var.glue_crawler_config.recrawl_policy
 }
 
 module "aws_glue_catalog_table" {
-  source   = "./modules/terraform-aws-glue/modules/glue-catalog-table"
-  for_each = var.glue_catalog_config
+  source = "./modules/terraform-aws-glue/modules/glue-catalog-table"
 
-  catalog_table_name        = each.value.catalog_table_name
-  catalog_table_description = each.value.catalog_table_description
-  database_name             = each.value.database_name
-  catalog_id                = each.value.catalog_id
-  owner                     = each.value.owner
-  parameters                = each.value.parameters
-  partition_index           = each.value.partition_index
-  partition_keys            = each.value.partition_keys
-  retention                 = each.value.retention
-  table_type                = each.value.table_type
-  target_table              = each.value.target_table
-  view_expanded_text        = each.value.view_expanded_text
-  view_original_text        = each.value.view_original_text
-  storage_descriptor        = each.value.storage_descriptor
+  catalog_table_name        = var.glue_catalog_table_config.catalog_table_name
+  catalog_table_description = var.glue_catalog_table_config.catalog_table_description
+  database_name             = module.glue_catalog_database.name
+  catalog_id                = var.glue_catalog_table_config.catalog_id
+  owner                     = var.glue_catalog_table_config.owner
+  parameters                = var.glue_catalog_table_config.parameters
+  partition_index           = var.glue_catalog_table_config.partition_index
+  partition_keys            = var.glue_catalog_table_config.partition_keys
+  retention                 = var.glue_catalog_table_config.retention
+  table_type                = var.glue_catalog_table_config.table_type
+  target_table              = var.glue_catalog_table_config.target_table
+  view_expanded_text        = var.glue_catalog_table_config.view_expanded_text
+  view_original_text        = var.glue_catalog_table_config.view_original_text
+  storage_descriptor        = var.glue_catalog_table_config.storage_descriptor
 }
 
 module "aws_glue_job" {
-  source   = "./modules/terraform-aws-glue/modules/glue-job"
-  for_each = var.glue_job_config
+  source = "./modules/terraform-aws-glue/modules/glue-job"
 
-  command                   = each.value.command
-  role_arn                  = each.value.role_arn
-  job_name                  = each.value.job_name
-  job_description           = each.value.job_description
-  connections               = each.value.connections
-  glue_version              = each.value.glue_version
-  default_arguments         = each.value.default_arguments
-  non_overridable_arguments = each.value.non_overridable_arguments
-  security_configuration    = each.value.security_configuration
-  timeout                   = each.value.timeout
-  max_capacity              = each.value.max_capacity
-  max_retries               = each.value.max_retries
-  worker_type               = each.value.worker_type
-  number_of_workers         = each.value.number_of_workers
-  execution_property        = each.value.execution_property
-  notification_property     = each.value.notification_property
+  command                   = var.glue_job_config.command
+  role_arn                  = var.glue_job_config.role_arn
+  job_name                  = var.glue_job_config.job_name
+  job_description           = var.glue_job_config.job_description
+  connections               = var.glue_job_config.connections
+  glue_version              = var.glue_job_config.glue_version
+  default_arguments         = var.glue_job_config.default_arguments
+  non_overridable_arguments = var.glue_job_config.non_overridable_arguments
+  security_configuration    = var.glue_job_config.security_configuration
+  timeout                   = var.glue_job_config.timeout
+  max_capacity              = var.glue_job_config.max_capacity
+  max_retries               = var.glue_job_config.max_retries
+  worker_type               = var.glue_job_config.worker_type
+  number_of_workers         = var.glue_job_config.number_of_workers
+  execution_property        = var.glue_job_config.execution_property
+  notification_property     = var.glue_job_config.notification_property
 }
 
 module "glue_catalog_database" {
-  source   = "./modules/terraform-aws-glue/modules/glue-catalog-database"
-  for_each = var.glue_catalog_database_config
+  source = "./modules/terraform-aws-glue/modules/glue-catalog-database"
 
-  catalog_database_name           = each.value.catalog_database_name
-  catalog_database_description    = each.value.catalog_database_description
-  catalog_id                      = each.value.catalog_id
-  create_table_default_permission = each.value.create_table_default_permission
-  location_uri                    = each.value.location_uri
-  parameters                      = each.value.parameters
-  target_database                 = each.value.target_database
+  catalog_database_name           = var.glue_catalog_database_config.catalog_database_name
+  catalog_database_description    = var.glue_catalog_database_config.catalog_database_description
+  catalog_id                      = var.glue_catalog_database_config.catalog_id
+  create_table_default_permission = var.glue_catalog_database_config.create_table_default_permission
+  location_uri                    = module.s3_object[""].s3_object_id
+  parameters                      = var.glue_catalog_database_config.parameters
+  target_database                 = var.glue_catalog_database_config.target_database
 }
 
+module "glue_workflow" {
+  source = "./modules/terraform-aws-glue/modules/glue-workflow"
+
+  workflow_name          = var.glue_workflow_config.workflow_name
+  workflow_description   = var.glue_workflow_config.workflow_description
+  default_run_properties = var.glue_workflow_config.default_run_properties
+  max_concurrent_runs    = var.glue_workflow_config.max_concurrent_runs
+
+}
+
+# Iam
 module "iam_role" {
   source   = "./modules/terraform-aws-iam/modules/iam-assumable-role"
   for_each = var.iam_role_config
@@ -216,18 +224,7 @@ module "iam_role" {
   role_session_name          = each.value.role_session_name
 }
 
-module "glue_workflow" {
-  source   = "./modules/terraform-aws-glue/modules/glue-workflow"
-  for_each = var.glue_workflow_config
-
-  workflow_name          = each.value.workflow_name
-  workflow_description   = each.value.workflow_description
-  default_run_properties = each.value.default_run_properties
-  max_concurrent_runs    = each.value.max_concurrent_runs
-
-}
-
-# events
+# Events
 # module "amazon_eventbridge" {
 #   source   = "./modules/terraform-aws-eventbridge"
 #   for_each = var.eventbridge_config
