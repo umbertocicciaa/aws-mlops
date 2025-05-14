@@ -108,109 +108,21 @@ variable "s3_object_config" {
 }
 
 # Glue configurations
-variable "glue_crawler_config" {
-  description = "Glue crawler configurations."
+variable "glue_catalog_database_config" {
+  description = "Glue catalog database configurations."
   type = object({
-    crawler_name        = optional(string, null)
-    crawler_description = optional(string, null)
-    database_name       = string
-    role                = string
-    schedule            = optional(string, null)
-    classifiers         = optional(list(string), null)
-    configuration       = optional(string, null)
-    jdbc_target         = optional(list(any), null)
-    #  type = list(object({
-    #    connection_name = string
-    #    path            = string
-    #    exclusions      = list(string)
-    #  }))
-    dynamodb_target = optional(list(any), null)
-    #  type = list(object({
-    #    path      = string
-    #    scan_all  = bool
-    #    scan_rate = number
-    #  }))
-    s3_target = optional(list(any), null)
-    #  type = list(object({
-    #    path                = string
-    #    connection_name     = string
-    #    exclusions          = list(string)
-    #    sample_size         = number
-    #    event_queue_arn     = string
-    #    dlq_event_queue_arn = string
-    #  }))
-    mongodb_target = optional(list(any), null)
-    #  type = list(object({
-    #    connection_name = string
-    #    path            = string
-    #    scan_all        = bool
-    #  }))
-    catalog_target = optional(list(object({
+    catalog_database_name           = optional(string, null)
+    catalog_database_description    = optional(string, null)
+    catalog_id                      = optional(string, null)
+    create_table_default_permission = optional(any, null)
+    location_uri                    = optional(string, null)
+    parameters                      = optional(map(string), null)
+    target_database = optional(object({
+      catalog_id    = string
       database_name = string
-      tables        = list(string)
-    })), null)
-    delta_target = optional(list(object({
-      connection_name = string
-      write_manifest  = bool
-      delta_tables    = list(string)
-    })), null)
-    table_prefix           = optional(string, null)
-    security_configuration = optional(string, null)
-    schema_change_policy   = optional(map(string), null)
-    #  type = object({
-    #    delete_behavior = string
-    #    update_behavior = string
-    #  })
-    lineage_configuration = optional(object({
-      crawler_lineage_settings = string
     }), null)
-    recrawl_policy = optional(object({
-      recrawl_behavior = string
-    }))
   })
-  default = {
-    database_name = ""
-    role          = ""
-  }
-}
-
-variable "glue_job_config" {
-  description = "Glue job configurations."
-  type = object({
-    job_name                  = optional(string)
-    job_description           = optional(string)
-    role_arn                  = string
-    connections               = optional(list(string))
-    glue_version              = optional(string, "2.0")
-    default_arguments         = optional(map(string))
-    non_overridable_arguments = optional(map(string))
-    security_configuration    = optional(string)
-    timeout                   = optional(number, 2880)
-    max_capacity              = optional(number)
-    max_retries               = optional(number)
-    worker_type               = optional(string)
-    number_of_workers         = optional(number)
-    command                   = map(any)
-    #  type = object({
-    #    # The name of the job command. Defaults to `glueetl`.
-    #    # Use `pythonshell` for Python Shell Job Type, or `gluestreaming` for Streaming Job Type.
-    #    name = string
-    #    # Specifies the S3 path to a script that executes the job
-    #    script_location = string
-    #    # The Python version being used to execute a Python shell job. Allowed values are 2 or 3
-    #    python_version = number
-    #  })
-    execution_property = optional(object({
-      max_concurrent_runs = number
-    }))
-    notification_property = optional(object({
-      notify_delay_after = number
-    }))
-  })
-  default = {
-    command  = {}
-    role_arn = ""
-  }
+  default = {}
 }
 
 variable "glue_catalog_table_config" {
@@ -314,21 +226,70 @@ variable "glue_catalog_table_config" {
   }
 }
 
-variable "glue_catalog_database_config" {
-  description = "Glue catalog database configurations."
+variable "glue_crawler_config" {
+  description = "Glue crawler configurations."
   type = object({
-    catalog_database_name           = optional(string, null)
-    catalog_database_description    = optional(string, null)
-    catalog_id                      = optional(string, null)
-    create_table_default_permission = optional(any, null)
-    location_uri                    = optional(string, null)
-    parameters                      = optional(map(string), null)
-    target_database = optional(object({
-      catalog_id    = string
+    crawler_name        = optional(string, null)
+    crawler_description = optional(string, null)
+    database_name       = string
+    role                = string
+    schedule            = optional(string, null)
+    classifiers         = optional(list(string), null)
+    configuration       = optional(string, null)
+    jdbc_target         = optional(list(any), null)
+    #  type = list(object({
+    #    connection_name = string
+    #    path            = string
+    #    exclusions      = list(string)
+    #  }))
+    dynamodb_target = optional(list(any), null)
+    #  type = list(object({
+    #    path      = string
+    #    scan_all  = bool
+    #    scan_rate = number
+    #  }))
+    s3_target = optional(list(any), null)
+    #  type = list(object({
+    #    path                = string
+    #    connection_name     = string
+    #    exclusions          = list(string)
+    #    sample_size         = number
+    #    event_queue_arn     = string
+    #    dlq_event_queue_arn = string
+    #  }))
+    mongodb_target = optional(list(any), null)
+    #  type = list(object({
+    #    connection_name = string
+    #    path            = string
+    #    scan_all        = bool
+    #  }))
+    catalog_target = optional(list(object({
       database_name = string
+      tables        = list(string)
+    })), null)
+    delta_target = optional(list(object({
+      connection_name = string
+      write_manifest  = bool
+      delta_tables    = list(string)
+    })), null)
+    table_prefix           = optional(string, null)
+    security_configuration = optional(string, null)
+    schema_change_policy   = optional(map(string), null)
+    #  type = object({
+    #    delete_behavior = string
+    #    update_behavior = string
+    #  })
+    lineage_configuration = optional(object({
+      crawler_lineage_settings = string
     }), null)
+    recrawl_policy = optional(object({
+      recrawl_behavior = string
+    }))
   })
-  default = {}
+  default = {
+    database_name = ""
+    role          = ""
+  }
 }
 
 variable "glue_workflow_config" {
@@ -342,13 +303,56 @@ variable "glue_workflow_config" {
   default = {}
 }
 
+variable "glue_job_config" {
+  description = "Glue job configurations."
+  type = object({
+    job_name                  = optional(string)
+    job_description           = optional(string)
+    role_arn                  = string
+    connections               = optional(list(string))
+    glue_version              = optional(string, "2.0")
+    default_arguments         = optional(map(string))
+    non_overridable_arguments = optional(map(string))
+    security_configuration    = optional(string)
+    timeout                   = optional(number, 2880)
+    max_capacity              = optional(number)
+    max_retries               = optional(number)
+    worker_type               = optional(string)
+    number_of_workers         = optional(number)
+    command                   = map(any)
+    #  type = object({
+    #    # The name of the job command. Defaults to `glueetl`.
+    #    # Use `pythonshell` for Python Shell Job Type, or `gluestreaming` for Streaming Job Type.
+    #    name = string
+    #    # Specifies the S3 path to a script that executes the job
+    #    script_location = string
+    #    # The Python version being used to execute a Python shell job. Allowed values are 2 or 3
+    #    python_version = number
+    #  })
+    execution_property = optional(object({
+      max_concurrent_runs = number
+    }))
+    notification_property = optional(object({
+      notify_delay_after = number
+    }))
+  })
+  default = {
+    command  = {}
+    role_arn = ""
+  }
+}
+
 # IAM role configurations
 variable "iam_role_config" {
   type = map(object({
-    trusted_role_actions              = optional(list(string), ["sts:AssumeRole", "sts:TagSession"])
-    trusted_role_arns                 = optional(list(string), [])
-    trusted_role_services             = optional(list(string), [])
-    trust_policy_conditions           = optional(list(string), [])
+    trusted_role_actions  = optional(list(string), ["sts:AssumeRole", "sts:TagSession"])
+    trusted_role_arns     = optional(list(string), [])
+    trusted_role_services = optional(list(string), [])
+    trust_policy_conditions = optional(list(object({
+      test     = string
+      variable = string
+      values   = list(string)
+    })), [])
     mfa_age                           = optional(number, 86400)
     max_session_duration              = optional(number, 3600)
     create_role                       = optional(bool, false)

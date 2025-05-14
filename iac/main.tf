@@ -100,129 +100,161 @@ module "s3_object" {
 }
 
 # Etl Preprocessing
-module "aws_glue_crawler" {
-  source = "./modules/terraform-aws-glue/modules/glue-crawler"
 
-  database_name          = var.glue_crawler_config.database_name
-  role                   = var.glue_crawler_config.role
-  crawler_name           = var.glue_crawler_config.crawler_name
-  crawler_description    = var.glue_crawler_config.crawler_description
-  schedule               = var.glue_crawler_config.schedule
-  classifiers            = var.glue_crawler_config.classifiers
-  configuration          = var.glue_crawler_config.configuration
-  jdbc_target            = var.glue_crawler_config.jdbc_target
-  dynamodb_target        = var.glue_crawler_config.dynamodb_target
-  s3_target              = var.glue_crawler_config.s3_target
-  mongodb_target         = var.glue_crawler_config.mongodb_target
-  catalog_target         = var.glue_crawler_config.catalog_target
-  delta_target           = var.glue_crawler_config.delta_target
-  table_prefix           = var.glue_crawler_config.table_prefix
-  security_configuration = var.glue_crawler_config.security_configuration
-  schema_change_policy   = var.glue_crawler_config.schema_change_policy
-  lineage_configuration  = var.glue_crawler_config.lineage_configuration
-  recrawl_policy         = var.glue_crawler_config.recrawl_policy
+module "glue_catalog_database" {
+  source = "./modules/terraform-aws-glue/modules/glue-catalog-database"
+
+  catalog_database_name        = var.glue_catalog_database_config.catalog_database_name
+  catalog_database_description = var.glue_catalog_database_config.catalog_database_description
+  #catalog_id                      = var.glue_catalog_database_config.catalog_id
+  #create_table_default_permission = var.glue_catalog_database_config.create_table_default_permission
+  location_uri = "s3://${module.s3[0].s3_bucket_id}/${module.s3_object[0].s3_object_id}"
+  #parameters                      = var.glue_catalog_database_config.parameters
+  #target_database                 = var.glue_catalog_database_config.target_database
 }
 
-module "aws_glue_catalog_table" {
+module "glue_catalog_table" {
   source = "./modules/terraform-aws-glue/modules/glue-catalog-table"
 
   catalog_table_name        = var.glue_catalog_table_config.catalog_table_name
   catalog_table_description = var.glue_catalog_table_config.catalog_table_description
   database_name             = module.glue_catalog_database.name
-  catalog_id                = var.glue_catalog_table_config.catalog_id
-  owner                     = var.glue_catalog_table_config.owner
-  parameters                = var.glue_catalog_table_config.parameters
-  partition_index           = var.glue_catalog_table_config.partition_index
-  partition_keys            = var.glue_catalog_table_config.partition_keys
-  retention                 = var.glue_catalog_table_config.retention
-  table_type                = var.glue_catalog_table_config.table_type
-  target_table              = var.glue_catalog_table_config.target_table
-  view_expanded_text        = var.glue_catalog_table_config.view_expanded_text
-  view_original_text        = var.glue_catalog_table_config.view_original_text
-  storage_descriptor        = var.glue_catalog_table_config.storage_descriptor
+  # catalog_id                = var.glue_catalog_table_config.catalog_id
+  # owner                     = var.glue_catalog_table_config.owner
+  # parameters                = var.glue_catalog_table_config.parameters
+  # partition_index           = var.glue_catalog_table_config.partition_index
+  # partition_keys            = var.glue_catalog_table_config.partition_keys
+  # retention                 = var.glue_catalog_table_config.retention
+  # table_type                = var.glue_catalog_table_config.table_type
+  # target_table              = var.glue_catalog_table_config.target_table
+  # view_expanded_text        = var.glue_catalog_table_config.view_expanded_text
+  # view_original_text        = var.glue_catalog_table_config.view_original_text
+  storage_descriptor = {
+    location = "s3://${module.s3[0].s3_bucket_id}/${module.s3_object[0].s3_object_id}"
+  }
 }
 
-module "aws_glue_job" {
-  source = "./modules/terraform-aws-glue/modules/glue-job"
+module "glue_crawler" {
+  source = "./modules/terraform-aws-glue/modules/glue-crawler"
 
-  command                   = var.glue_job_config.command
-  role_arn                  = var.glue_job_config.role_arn
-  job_name                  = var.glue_job_config.job_name
-  job_description           = var.glue_job_config.job_description
-  connections               = var.glue_job_config.connections
-  glue_version              = var.glue_job_config.glue_version
-  default_arguments         = var.glue_job_config.default_arguments
-  non_overridable_arguments = var.glue_job_config.non_overridable_arguments
-  security_configuration    = var.glue_job_config.security_configuration
-  timeout                   = var.glue_job_config.timeout
-  max_capacity              = var.glue_job_config.max_capacity
-  max_retries               = var.glue_job_config.max_retries
-  worker_type               = var.glue_job_config.worker_type
-  number_of_workers         = var.glue_job_config.number_of_workers
-  execution_property        = var.glue_job_config.execution_property
-  notification_property     = var.glue_job_config.notification_property
+  database_name       = module.glue_catalog_database.name
+  role                = module.glue_iam_role.arn
+  crawler_name        = var.glue_crawler_config.crawler_name
+  crawler_description = var.glue_crawler_config.crawler_description
+  schedule            = var.glue_crawler_config.schedule
+  # classifiers            = var.glue_crawler_config.classifiers
+  # configuration          = var.glue_crawler_config.configuration
+  # jdbc_target            = var.glue_crawler_config.jdbc_target
+  # dynamodb_target        = var.glue_crawler_config.dynamodb_target
+  # s3_target              = var.glue_crawler_config.s3_target
+  # mongodb_target         = var.glue_crawler_config.mongodb_target
+  catalog_target = [
+    {
+      database_name = module.glue_catalog_database.name
+      tables        = [module.glue_catalog_table.name]
+    }
+  ]
+  # delta_target           = var.glue_crawler_config.delta_target
+  # table_prefix           = var.glue_crawler_config.table_prefix
+  # security_configuration = var.glue_crawler_config.security_configuration
+  schema_change_policy = {
+
+    delete_behavior = "LOG"
+    update_behavior = null
+  }
+  # lineage_configuration  = var.glue_crawler_config.lineage_configuration
+  # recrawl_policy         = var.glue_crawler_config.recrawl_policy
 }
 
-module "glue_catalog_database" {
-  source = "./modules/terraform-aws-glue/modules/glue-catalog-database"
+module "glue_iam_role" {
+  source  = "cloudposse/iam-role/aws"
+  version = "0.16.2"
 
-  catalog_database_name           = var.glue_catalog_database_config.catalog_database_name
-  catalog_database_description    = var.glue_catalog_database_config.catalog_database_description
-  catalog_id                      = var.glue_catalog_database_config.catalog_id
-  create_table_default_permission = var.glue_catalog_database_config.create_table_default_permission
-  location_uri                    = module.s3_object[""].s3_object_id
-  parameters                      = var.glue_catalog_database_config.parameters
-  target_database                 = var.glue_catalog_database_config.target_database
+  principals = {
+    "Service" = ["glue.amazonaws.com"]
+  }
+
+  managed_policy_arns = [
+    "arn:aws:iam::aws:policy/service-role/AWSGlueServiceRole"
+  ]
+
+  policy_document_count = 0
+  policy_description    = "Policy for AWS Glue with access to EC2, S3, and Cloudwatch Logs"
+  role_description      = "Role for AWS Glue with access to EC2, S3, and Cloudwatch Logs"
 }
 
 module "glue_workflow" {
   source = "./modules/terraform-aws-glue/modules/glue-workflow"
 
-  workflow_name          = var.glue_workflow_config.workflow_name
-  workflow_description   = var.glue_workflow_config.workflow_description
-  default_run_properties = var.glue_workflow_config.default_run_properties
-  max_concurrent_runs    = var.glue_workflow_config.max_concurrent_runs
+  workflow_name        = var.glue_workflow_config.workflow_name
+  workflow_description = var.glue_workflow_config.workflow_description
+  #default_run_properties = var.glue_workflow_config.default_run_properties
+  max_concurrent_runs = var.glue_workflow_config.max_concurrent_runs
+}
 
+module "aws_glue_job" {
+  source = "./modules/terraform-aws-glue/modules/glue-job"
+
+  command = {
+    name            = "glueetl"
+    script_location = format("s3://%s/pre_processing.py", module.s3[0].s3_bucket_id)
+    python_version  = 3
+  }
+  role_arn        = module.glue_iam_role.arn
+  job_name        = var.glue_job_config.job_name
+  job_description = var.glue_job_config.job_description
+  # connections               = var.glue_job_config.connections
+  glue_version = var.glue_job_config.glue_version
+  # default_arguments         = var.glue_job_config.default_arguments
+  # non_overridable_arguments = var.glue_job_config.non_overridable_arguments
+  # security_configuration    = var.glue_job_config.security_configuration
+  timeout = var.glue_job_config.timeout
+  #max_capacity              = var.glue_job_config.max_capacity
+  max_retries       = var.glue_job_config.max_retries
+  worker_type       = var.glue_job_config.worker_type
+  number_of_workers = var.glue_job_config.number_of_workers
+  #execution_property        = var.glue_job_config.execution_property
+  #notification_property     = var.glue_job_config.notification_property
 }
 
 # Iam
-module "iam_role" {
-  source   = "./modules/terraform-aws-iam/modules/iam-assumable-role"
-  for_each = var.iam_role_config
-
-  trusted_role_actions              = each.value.trusted_role_actions
-  trusted_role_arns                 = each.value.trusted_role_arns
-  trusted_role_services             = each.value.trusted_role_services
-  trust_policy_conditions           = each.value.trust_policy_conditions
-  mfa_age                           = each.value.mfa_age
-  max_session_duration              = each.value.max_session_duration
-  create_role                       = each.value.create_role
-  create_instance_profile           = each.value.create_instance_profile
-  role_name                         = each.value.role_name
-  role_name_prefix                  = each.value.role_name_prefix
-  role_path                         = each.value.role_path
-  role_requires_mfa                 = each.value.role_requires_mfa
-  role_permissions_boundary_arn     = each.value.role_permissions_boundary_arn
-  tags                              = each.value.tags
-  custom_role_policy_arns           = each.value.custom_role_policy_arns
-  custom_role_trust_policy          = each.value.custom_role_trust_policy
-  create_custom_role_trust_policy   = each.value.create_custom_role_trust_policy
-  number_of_custom_role_policy_arns = each.value.number_of_custom_role_policy_arns
-  inline_policy_statements          = each.value.inline_policy_statements
-  # Pre-defined policies
-  admin_role_policy_arn      = each.value.admin_role_policy_arn
-  poweruser_role_policy_arn  = each.value.poweruser_role_policy_arn
-  readonly_role_policy_arn   = each.value.readonly_role_policy_arn
-  attach_admin_policy        = each.value.attach_admin_policy
-  attach_poweruser_policy    = each.value.attach_poweruser_policy
-  attach_readonly_policy     = each.value.attach_readonly_policy
-  force_detach_policies      = each.value.force_detach_policies
-  role_description           = each.value.role_description
-  role_sts_externalid        = each.value.role_sts_externalid
-  allow_self_assume_role     = each.value.allow_self_assume_role
-  role_requires_session_name = each.value.role_requires_session_name
-  role_session_name          = each.value.role_session_name
-}
+#module "iam_role" {
+#  source   = "./modules/terraform-aws-iam/modules/iam-assumable-role"
+#  for_each = var.iam_role_config
+#
+#  trusted_role_actions              = each.value.trusted_role_actions
+#  trusted_role_arns                 = each.value.trusted_role_arns
+#  trusted_role_services             = each.value.trusted_role_services
+#  trust_policy_conditions           = each.value.trust_policy_conditions
+#  mfa_age                           = each.value.mfa_age
+#  max_session_duration              = each.value.max_session_duration
+#  create_role                       = each.value.create_role
+#  create_instance_profile           = each.value.create_instance_profile
+#  role_name                         = each.value.role_name
+#  role_name_prefix                  = each.value.role_name_prefix
+#  role_path                         = each.value.role_path
+#  role_requires_mfa                 = each.value.role_requires_mfa
+#  role_permissions_boundary_arn     = each.value.role_permissions_boundary_arn
+#  tags                              = each.value.tags
+#  custom_role_policy_arns           = each.value.custom_role_policy_arns
+#  custom_role_trust_policy          = each.value.custom_role_trust_policy
+#  create_custom_role_trust_policy   = each.value.create_custom_role_trust_policy
+#  number_of_custom_role_policy_arns = each.value.number_of_custom_role_policy_arns
+#  inline_policy_statements          = each.value.inline_policy_statements
+#  # Pre-defined policies
+#  admin_role_policy_arn      = each.value.admin_role_policy_arn
+#  poweruser_role_policy_arn  = each.value.poweruser_role_policy_arn
+#  readonly_role_policy_arn   = each.value.readonly_role_policy_arn
+#  attach_admin_policy        = each.value.attach_admin_policy
+#  attach_poweruser_policy    = each.value.attach_poweruser_policy
+#  attach_readonly_policy     = each.value.attach_readonly_policy
+#  force_detach_policies      = each.value.force_detach_policies
+#  role_description           = each.value.role_description
+#  role_sts_externalid        = each.value.role_sts_externalid
+#  allow_self_assume_role     = each.value.allow_self_assume_role
+#  role_requires_session_name = each.value.role_requires_session_name
+#  role_session_name          = each.value.role_session_name
+#}
 
 # Events
 # module "amazon_eventbridge" {
