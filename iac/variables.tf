@@ -126,7 +126,7 @@ variable "glue_catalog_database_config" {
 }
 
 variable "glue_catalog_table_config" {
-  description = "Glue catalog configurations."
+  description = "Glue catalog table configurations."
   type = object({
     catalog_table_name        = optional(string, null)
     catalog_table_description = optional(string, null)
@@ -344,6 +344,7 @@ variable "glue_job_config" {
 
 # IAM role configurations
 variable "iam_role_config" {
+  description = "IAM role configurations."
   type = map(object({
     trusted_role_actions  = optional(list(string), ["sts:AssumeRole", "sts:TagSession"])
     trusted_role_arns     = optional(list(string), [])
@@ -381,13 +382,12 @@ variable "iam_role_config" {
     role_requires_session_name        = optional(bool, false)
     role_session_name                 = optional(list(string), ["$${aws:username}"])
   }))
-  description = "IAM role configurations."
   default     = {}
 }
 
 # Eventbridge configurations
 variable "eventbridge_config" {
-  description = "S3 bucket configurations."
+  description = "Event bridge configurations."
   type = map(object({
     create                        = optional(bool, true)
     create_role                   = optional(bool, true)
