@@ -130,7 +130,7 @@ variable "glue_catalog_table_config" {
   type = object({
     catalog_table_name        = optional(string, null)
     catalog_table_description = optional(string, null)
-    database_name             = string
+    database_name             = optional(string, "")
     catalog_id                = optional(string, null)
     owner                     = optional(string, null)
     parameters                = optional(map(string), null)
@@ -231,8 +231,8 @@ variable "glue_crawler_config" {
   type = object({
     crawler_name        = optional(string, null)
     crawler_description = optional(string, null)
-    database_name       = string
-    role                = string
+    database_name       = optional(string, "")
+    role                = optional(string, "")
     schedule            = optional(string, null)
     classifiers         = optional(list(string), null)
     configuration       = optional(string, null)
@@ -308,7 +308,7 @@ variable "glue_job_config" {
   type = object({
     job_name                  = optional(string)
     job_description           = optional(string)
-    role_arn                  = string
+    role_arn                  = optional(string)
     connections               = optional(list(string))
     glue_version              = optional(string, "2.0")
     default_arguments         = optional(map(string))
@@ -319,7 +319,7 @@ variable "glue_job_config" {
     max_retries               = optional(number)
     worker_type               = optional(string)
     number_of_workers         = optional(number)
-    command                   = map(any)
+    command                   = optional(map(any))
     #  type = object({
     #    # The name of the job command. Defaults to `glueetl`.
     #    # Use `pythonshell` for Python Shell Job Type, or `gluestreaming` for Streaming Job Type.
@@ -382,7 +382,7 @@ variable "iam_role_config" {
     role_requires_session_name        = optional(bool, false)
     role_session_name                 = optional(list(string), ["$${aws:username}"])
   }))
-  default     = {}
+  default = {}
 }
 
 # Eventbridge configurations

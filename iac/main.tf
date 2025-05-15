@@ -72,7 +72,7 @@ module "s3_object" {
   for_each = var.s3_object_config
 
   create      = each.value.create
-  bucket      = module.s3[0].s3_bucket_id
+  bucket      = module.s3["data_source_bucket"].s3_bucket_id
   key         = each.value.key
   file_source = each.value.file_source
   # content                       = each.value.content
@@ -108,9 +108,10 @@ module "glue_catalog_database" {
   catalog_database_description = var.glue_catalog_database_config.catalog_database_description
   #catalog_id                      = var.glue_catalog_database_config.catalog_id
   #create_table_default_permission = var.glue_catalog_database_config.create_table_default_permission
-  location_uri = "s3://${module.s3[0].s3_bucket_id}/${module.s3_object[0].s3_object_id}"
+  location_uri = "s3://${module.s3["data_source_bucket"].s3_bucket_id}/${module.s3_object["dataset-object"].s3_object_id}"
   #parameters                      = var.glue_catalog_database_config.parameters
   #target_database                 = var.glue_catalog_database_config.target_database
+  depends_on = [module.s3, module.s3_object]
 }
 
 module "glue_catalog_table" {
@@ -130,8 +131,9 @@ module "glue_catalog_table" {
   # view_expanded_text        = var.glue_catalog_table_config.view_expanded_text
   # view_original_text        = var.glue_catalog_table_config.view_original_text
   storage_descriptor = {
-    location = "s3://${module.s3[0].s3_bucket_id}/${module.s3_object[0].s3_object_id}"
+    location = "s3://${module.s3["data_source_bucket"].s3_bucket_id}/${module.s3_object["dataset-object"].s3_object_id}"
   }
+  depends_on = [module.s3, module.s3_object]
 }
 
 module "glue_crawler" {
@@ -170,6 +172,7 @@ module "glue_iam_role" {
   source  = "cloudposse/iam-role/aws"
   version = "0.21.0"
 
+  name = "glue-iam-role"
   principals = {
     "Service" = ["glue.amazonaws.com"]
   }
@@ -186,6 +189,7 @@ module "glue_iam_role" {
 module "glue_workflow" {
   source = "./modules/terraform-aws-glue/modules/glue-workflow"
 
+  name                 = "glue-workflow-elt-preprocessing"
   workflow_name        = var.glue_workflow_config.workflow_name
   workflow_description = var.glue_workflow_config.workflow_description
   #default_run_properties = var.glue_workflow_config.default_run_properties
@@ -197,7 +201,7 @@ module "aws_glue_job" {
 
   command = {
     name            = "glueetl"
-    script_location = format("s3://%s/pre_processing.py", module.s3[0].s3_bucket_id)
+    script_location = format("s3://%s/pre_processing.py", module.s3["data_source_bucket"].s3_bucket_id)
     python_version  = 3
   }
   role_arn        = module.glue_iam_role.arn
@@ -215,6 +219,37 @@ module "aws_glue_job" {
   number_of_workers = var.glue_job_config.number_of_workers
   #execution_property        = var.glue_job_config.execution_property
   #notification_property     = var.glue_job_config.notification_property
+}
+
+module "glue_trigger" {
+  source = "./modules/terraform-aws-glue/modules/glue-trigger"
+
+  name                = "prod-trigger-elt-preprocessing"
+  workflow_name       = module.aws_glue_job.name
+  trigger_enabled     = true
+  start_on_creation   = false
+  trigger_description = "Glue Trigger that triggers a Glue Job on a schedule"
+  type                = "EVENT"
+
+  actions = [
+    {
+      job_name = module.aws_glue_job.name
+      timeout  = 10
+    }
+  ]
+
+  predicate = {
+    logical = "ANY"
+    conditions = [
+      {
+        logical_operator = "EQUALS"
+        key              = "State"
+        value            = "SUCCEEDED"
+        job_name         = module.glue_catalog_table.name
+      }
+    ]
+  }
+
 }
 
 # Iam
