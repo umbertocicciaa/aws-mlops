@@ -1,4 +1,8 @@
 # S3
+resource "random_id" "randomstring" {
+  byte_length = 4
+}
+
 module "s3" {
   source   = "./modules/terraform-aws-s3-bucket"
   for_each = var.s3_config
@@ -18,7 +22,7 @@ module "s3" {
   allowed_kms_key_arn                             = each.value.allowed_kms_key_arn
   attach_deny_unencrypted_object_uploads          = each.value.attach_deny_unencrypted_object_uploads
   attach_deny_ssec_encrypted_object_uploads       = each.value.attach_deny_ssec_encrypted_object_uploads
-  bucket                                          = each.value.bucket
+  bucket                                          = "${each.value.bucket}-${terraform.workspace}-${random_id.randomstring.hex}"
   bucket_prefix                                   = each.value.bucket_prefix
   acl                                             = each.value.acl
   policy                                          = each.value.policy
@@ -225,7 +229,7 @@ module "glue_trigger" {
   source = "./modules/terraform-aws-glue/modules/glue-trigger"
 
   name                = "prod-trigger-elt-preprocessing"
-  workflow_name       = module.aws_glue_job.name
+  workflow_name       = module.glue_workflow.name
   trigger_enabled     = true
   start_on_creation   = false
   trigger_description = "Glue Trigger that triggers a Glue Job on a schedule"
@@ -237,18 +241,6 @@ module "glue_trigger" {
       timeout  = 10
     }
   ]
-
-  predicate = {
-    logical = "ANY"
-    conditions = [
-      {
-        logical_operator = "EQUALS"
-        key              = "State"
-        value            = "SUCCEEDED"
-        job_name         = module.glue_catalog_table.name
-      }
-    ]
-  }
 
 }
 
