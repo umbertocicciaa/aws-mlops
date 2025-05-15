@@ -168,7 +168,7 @@ module "glue_crawler" {
 
 module "glue_iam_role" {
   source  = "cloudposse/iam-role/aws"
-  version = "0.16.2"
+  version = "0.21.0"
 
   principals = {
     "Service" = ["glue.amazonaws.com"]
