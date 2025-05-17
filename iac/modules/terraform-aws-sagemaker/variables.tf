@@ -9,8 +9,8 @@ variable "s3_data_bucket_name" {
   type        = string
 }
 
-variable "sagemaker_bucket.bucket" {
-  description = "S3 bucket region where scripts are stored"
+variable "sagemaker_bucket" {
+  description = "S3 bucket where scripts are stored"
   type        = string
 }
 

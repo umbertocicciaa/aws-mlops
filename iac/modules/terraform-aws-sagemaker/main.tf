@@ -70,7 +70,7 @@ resource "aws_sagemaker_pipeline" "mlops_pipeline" {
             {
               "InputName" : "code",
               "S3Input" : {
-                "S3Uri" : "s3://${aws_s3_bucket.var.sagemaker_bucket.bucket}/training.py",
+                "S3Uri" : "s3://${var.sagemaker_bucket}/training.py",
                 "LocalPath" : "/opt/ml/processing/input/code",
                 "S3DataType" : "S3Prefix",
                 "S3InputMode" : "File",
@@ -94,7 +94,7 @@ resource "aws_sagemaker_pipeline" "mlops_pipeline" {
             {
               "OutputName" : "train",
               "S3Output" : {
-                "S3Uri" : "s3://${aws_s3_bucket.var.sagemaker_bucket.bucket}/output/preprocessing/train",
+                "S3Uri" : "s3://${var.sagemaker_bucket}/output/preprocessing/train",
                 "LocalPath" : "/opt/ml/processing/output/train",
                 "S3UploadMode" : "EndOfJob"
               }
@@ -102,7 +102,7 @@ resource "aws_sagemaker_pipeline" "mlops_pipeline" {
             {
               "OutputName" : "validation",
               "S3Output" : {
-                "S3Uri" : "s3://${aws_s3_bucket.var.sagemaker_bucket.bucket}/output/preprocessing/validation",
+                "S3Uri" : "s3://${var.sagemaker_bucket}/output/preprocessing/validation",
                 "LocalPath" : "/opt/ml/processing/output/validation",
                 "S3UploadMode" : "EndOfJob"
               }
@@ -110,7 +110,7 @@ resource "aws_sagemaker_pipeline" "mlops_pipeline" {
             {
               "OutputName" : "test",
               "S3Output" : {
-                "S3Uri" : "s3://${aws_s3_bucket.var.sagemaker_bucket.bucket}/output/preprocessing/test",
+                "S3Uri" : "s3://${var.sagemaker_bucket}/output/preprocessing/test",
                 "LocalPath" : "/opt/ml/processing/output/test",
                 "S3UploadMode" : "EndOfJob"
               }
@@ -165,7 +165,7 @@ resource "aws_sagemaker_pipeline" "mlops_pipeline" {
             }
           ],
           "OutputDataConfig" : {
-            "S3OutputPath" : "s3://${aws_s3_bucket.var.sagemaker_bucket.bucket}/output/model"
+            "S3OutputPath" : "s3://${var.sagemaker_bucket}/output/model"
           },
           "ResourceConfig" : {
             "InstanceCount" : 1,
@@ -196,7 +196,7 @@ resource "aws_sagemaker_pipeline" "mlops_pipeline" {
             {
               "InputName" : "code",
               "S3Input" : {
-                "S3Uri" : "s3://${aws_s3_bucket.var.sagemaker_bucket.bucket}/evaluate.py",
+                "S3Uri" : "s3://${var.sagemaker_bucket}/evaluate.py",
                 "LocalPath" : "/opt/ml/processing/input/code",
                 "S3DataType" : "S3Prefix",
                 "S3InputMode" : "File",
@@ -231,7 +231,7 @@ resource "aws_sagemaker_pipeline" "mlops_pipeline" {
             {
               "OutputName" : "evaluation",
               "S3Output" : {
-                "S3Uri" : "s3://${aws_s3_bucket.var.sagemaker_bucket.bucket}/output/evaluation",
+                "S3Uri" : "s3://${var.sagemaker_bucket}/output/evaluation",
                 "LocalPath" : "/opt/ml/processing/output/evaluation",
                 "S3UploadMode" : "EndOfJob"
               }
@@ -306,7 +306,7 @@ resource "aws_sagemaker_model" "model" {
 
   primary_container {
     image          = "683313688378.dkr.ecr.us-west-2.amazonaws.com/sagemaker-xgboost:1.5-1"
-    model_data_url = "s3://${aws_s3_bucket.var.sagemaker_bucket.bucket}/output/model/model.tar.gz"
+    model_data_url = "s3://${var.sagemaker_bucket}/output/model/model.tar.gz"
   }
 
   # This resource depends on the pipeline execution which creates the model
