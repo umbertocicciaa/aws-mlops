@@ -345,7 +345,7 @@ variable "glue_job_config" {
 # Eventbridge configurations
 variable "eventbridge_config" {
   description = "Event bridge configurations."
-  type = map(object({
+  type = object({
     create                        = optional(bool, true)
     create_role                   = optional(bool, true)
     create_pipe_role_only         = optional(bool, false)
@@ -426,7 +426,7 @@ variable "eventbridge_config" {
     policies                 = optional(list(string), [])
     policy_statements        = optional(any, {})
 
-  }))
+  })
   default = {}
 }
 

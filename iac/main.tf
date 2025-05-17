@@ -104,7 +104,6 @@ module "s3_object" {
 }
 
 # Etl Preprocessing
-
 module "glue_catalog_database" {
   source = "./modules/terraform-aws-glue/modules/glue-catalog-database"
 
@@ -245,90 +244,113 @@ module "glue_trigger" {
 }
 
 # eventbridge configuration
-module "event_bridge" {
+module "glue_event_bridge" {
   source = "./modules/terraform-aws-eventbridge"
 
-  for_each = var.eventbridge_config
+  create                        = true
+  create_role                   = true
+  # create_pipe_role_only         = var.eventbridge_config.create_pipe_role_only
+  create_bus                    = false
+  # create_rules                  = var.eventbridge_config.create_rules
+  # create_targets                = var.eventbridge_config.create_targets
+  # create_permissions            = var.eventbridge_config.create_permissions
+  # create_archives               = var.eventbridge_config.create_archives
+  # create_connections            = var.eventbridge_config.create_connections
+  # create_api_destinations       = var.eventbridge_config.create_api_destinations
+  # create_schemas_discoverer     = var.eventbridge_config.create_schemas_discoverer
+  # create_schedule_groups        = var.eventbridge_config.create_schedule_groups
+  # create_schedules              = var.eventbridge_config.create_schedules
+  # create_pipes                  = var.eventbridge_config.create_pipes
+  # append_rule_postfix           = var.eventbridge_config.append_rule_postfix
+  # append_connection_postfix     = var.eventbridge_config.append_connection_postfix
+  # append_destination_postfix    = var.eventbridge_config.append_destination_postfix
+  # append_schedule_group_postfix = var.eventbridge_config.append_schedule_group_postfix
+  # append_schedule_postfix       = var.eventbridge_config.append_schedule_postfix
+  # append_pipe_postfix           = var.eventbridge_config.append_pipe_postfix
+# 
+  # bus_name                       = var.eventbridge_config.bus_name
+  # bus_description                = var.eventbridge_config.bus_description
+  # event_source_name              = var.eventbridge_config.event_source_name
+  # kms_key_identifier             = var.eventbridge_config.kms_key_identifier
+  # schemas_discoverer_description = var.eventbridge_config.schemas_discoverer_description
+  rules = {
+    glue_rule = {
+      name        = "trigger-glue-workflow"
+      description = "Trigger Glue workflow based on specific events"
+      event_pattern = jsonencode({
+        "source" : ["aws.s3"],
+        "detail-type" : ["Object Created"],
+        "detail" : {
+          "bucket" : {
+            "name" : ["${module.s3["data_source_bucket"].s3_bucket_id}"]
+          }
+        }
+      })
+    }
+  }
+  targets = {
+    glue_rule = {
+      arn = module.glue_workflow.arn
+      attach_role_arn = true
+    }
+  }
+  # archives                = var.eventbridge_config.archives
+  # permissions             = var.eventbridge_config.permissions
+  # connections             = var.eventbridge_config.connections
+  # api_destinations        = var.eventbridge_config.api_destinations
+  # schedule_groups         = var.eventbridge_config.schedule_groups
+  # schedules               = var.eventbridge_config.schedules
+  # pipes                   = var.eventbridge_config.pipes
+  # tags                    = var.eventbridge_config.tags
+  # schedule_group_timeouts = var.eventbridge_config.schedule_group_timeouts
 
-  create                        = each.value.create
-  create_role                   = each.value.create_role
-  create_pipe_role_only         = each.value.create_pipe_role_only
-  create_bus                    = each.value.create_bus
-  create_rules                  = each.value.create_rules
-  create_targets                = each.value.create_targets
-  create_permissions            = each.value.create_permissions
-  create_archives               = each.value.create_archives
-  create_connections            = each.value.create_connections
-  create_api_destinations       = each.value.create_api_destinations
-  create_schemas_discoverer     = each.value.create_schemas_discoverer
-  create_schedule_groups        = each.value.create_schedule_groups
-  create_schedules              = each.value.create_schedules
-  create_pipes                  = each.value.create_pipes
-  append_rule_postfix           = each.value.append_rule_postfix
-  append_connection_postfix     = each.value.append_connection_postfix
-  append_destination_postfix    = each.value.append_destination_postfix
-  append_schedule_group_postfix = each.value.append_schedule_group_postfix
-  append_schedule_postfix       = each.value.append_schedule_postfix
-  append_pipe_postfix           = each.value.append_pipe_postfix
+  # role_name                  = var.eventbridge_config.role_name
+  # role_description           = var.eventbridge_config.role_description
+  # role_path                  = var.eventbridge_config.role_path
+  # policy_path                = var.eventbridge_config.policy_path
+  # role_force_detach_policies = var.eventbridge_config.role_force_detach_policies
+  # role_permissions_boundary  = var.eventbridge_config.role_permissions_boundary
+  # role_tags                  = var.eventbridge_config.role_tags
+  # ecs_pass_role_resources    = var.eventbridge_config.ecs_pass_role_resources
 
-  bus_name                       = each.value.bus_name
-  bus_description                = each.value.bus_description
-  event_source_name              = each.value.event_source_name
-  kms_key_identifier             = each.value.kms_key_identifier
-  schemas_discoverer_description = each.value.schemas_discoverer_description
-  rules                          = each.value.rules
-  targets                        = each.value.targets
-  archives                       = each.value.archives
-  permissions                    = each.value.permissions
-  connections                    = each.value.connections
-  api_destinations               = each.value.api_destinations
-  schedule_groups                = each.value.schedule_groups
-  schedules                      = each.value.schedules
-  pipes                          = each.value.pipes
-  tags                           = each.value.tags
-  schedule_group_timeouts        = each.value.schedule_group_timeouts
+  # attach_kinesis_policy          = var.eventbridge_config.attach_kinesis_policy
+  # attach_kinesis_firehose_policy = var.eventbridge_config.attach_kinesis_firehose_policy
+  # attach_sqs_policy              = var.eventbridge_config.attach_sqs_policy
+  # attach_sns_policy              = var.eventbridge_config.attach_sns_policy
+  # attach_ecs_policy              = var.eventbridge_config.attach_ecs_policy
+  # attach_lambda_policy           = var.eventbridge_config.attach_lambda_policy
+  # attach_sfn_policy              = var.eventbridge_config.attach_sfn_policy
+  # attach_cloudwatch_policy       = var.eventbridge_config.attach_cloudwatch_policy
+  # attach_api_destination_policy  = var.eventbridge_config.attach_api_destination_policy
+  # attach_tracing_policy          = var.eventbridge_config.attach_tracing_policy
+  # kinesis_target_arns            = var.eventbridge_config.kinesis_target_arns
+  # kinesis_firehose_target_arns   = var.eventbridge_config.kinesis_firehose_target_arns
+  # sqs_target_arns                = var.eventbridge_config.sqs_target_arns
+  # sns_target_arns                = var.eventbridge_config.sns_target_arns
+  # sns_kms_arns                   = var.eventbridge_config.sns_kms_arns
+  # ecs_target_arns                = var.eventbridge_config.ecs_target_arns
+  # lambda_target_arns             = var.eventbridge_config.lambda_target_arns
+  # sfn_target_arns                = var.eventbridge_config.sfn_target_arns
+  # cloudwatch_target_arns         = var.eventbridge_config.cloudwatch_target_arns
 
-  role_name                  = each.value.role_name
-  role_description           = each.value.role_description
-  role_path                  = each.value.role_path
-  policy_path                = each.value.policy_path
-  role_force_detach_policies = each.value.role_force_detach_policies
-  role_permissions_boundary  = each.value.role_permissions_boundary
-  role_tags                  = each.value.role_tags
-  ecs_pass_role_resources    = each.value.ecs_pass_role_resources
-
-  attach_kinesis_policy          = each.value.attach_kinesis_policy
-  attach_kinesis_firehose_policy = each.value.attach_kinesis_firehose_policy
-  attach_sqs_policy              = each.value.attach_sqs_policy
-  attach_sns_policy              = each.value.attach_sns_policy
-  attach_ecs_policy              = each.value.attach_ecs_policy
-  attach_lambda_policy           = each.value.attach_lambda_policy
-  attach_sfn_policy              = each.value.attach_sfn_policy
-  attach_cloudwatch_policy       = each.value.attach_cloudwatch_policy
-  attach_api_destination_policy  = each.value.attach_api_destination_policy
-  attach_tracing_policy          = each.value.attach_tracing_policy
-  kinesis_target_arns            = each.value.kinesis_target_arns
-  kinesis_firehose_target_arns   = each.value.kinesis_firehose_target_arns
-  sqs_target_arns                = each.value.sqs_target_arns
-  sns_target_arns                = each.value.sns_target_arns
-  sns_kms_arns                   = each.value.sns_kms_arns
-  ecs_target_arns                = each.value.ecs_target_arns
-  lambda_target_arns             = each.value.lambda_target_arns
-  sfn_target_arns                = each.value.sfn_target_arns
-  cloudwatch_target_arns         = each.value.cloudwatch_target_arns
-
-  attach_policy_json       = each.value.attach_policy_json
-  attach_policy_jsons      = each.value.attach_policy_jsons
-  attach_policy            = each.value.attach_policy
-  attach_policies          = each.value.attach_policies
-  number_of_policy_jsons   = each.value.number_of_policy_jsons
-  number_of_policies       = each.value.number_of_policies
-  attach_policy_statements = each.value.attach_policy_statements
-  trusted_entities         = each.value.trusted_entities
-  policy_json              = each.value.policy_json
-  policy_jsons             = each.value.policy_jsons
-  policies                 = each.value.policies
-  policy_statements        = each.value.policy_statements
+  # attach_policy_json       = var.eventbridge_config.attach_policy_json
+  # attach_policy_jsons      = var.eventbridge_config.attach_policy_jsons
+  # attach_policy            = var.eventbridge_config.attach_policy
+  # attach_policies          = var.eventbridge_config.attach_policies
+  # number_of_policy_jsons   = var.eventbridge_config.number_of_policy_jsons
+  # number_of_policies       = var.eventbridge_config.number_of_policies
+  attach_policy_statements = true
+  # trusted_entities         = var.eventbridge_config.trusted_entities
+  # policy_json              = var.eventbridge_config.policy_json
+  # policy_jsons             = var.eventbridge_config.policy_jsons
+  # policies                 = var.eventbridge_config.policies
+  policy_statements = {
+    glue = {
+      effect    = "Allow",
+      actions   = ["glue:StartTrigger"],
+      resources = ["${module.glue_trigger.arn}"],
+    },
+  }
 }
 
 # Sagemaker
