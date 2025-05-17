@@ -76,7 +76,7 @@ module "s3_object" {
   for_each = var.s3_object_config
 
   create      = each.value.create
-  bucket      = module.s3["data_source_bucket"].s3_bucket_id
+  bucket      = module.s3["scripts_source_bucket"].s3_bucket_id
   key         = each.value.key
   file_source = each.value.file_source
   # content                       = each.value.content
@@ -112,7 +112,7 @@ module "glue_catalog_database" {
   catalog_database_description = var.glue_catalog_database_config.catalog_database_description
   #catalog_id                      = var.glue_catalog_database_config.catalog_id
   #create_table_default_permission = var.glue_catalog_database_config.create_table_default_permission
-  location_uri = "s3://${module.s3["data_source_bucket"].s3_bucket_id}/${module.s3_object["dataset-object"].s3_object_id}"
+  location_uri = "s3://${module.s3["scripts_source_bucket"].s3_bucket_id}/${module.s3_object["pre_processing_object"].s3_object_id}"
   #parameters                      = var.glue_catalog_database_config.parameters
   #target_database                 = var.glue_catalog_database_config.target_database
   depends_on = [module.s3, module.s3_object]
@@ -135,7 +135,7 @@ module "glue_catalog_table" {
   # view_expanded_text        = var.glue_catalog_table_config.view_expanded_text
   # view_original_text        = var.glue_catalog_table_config.view_original_text
   storage_descriptor = {
-    location = "s3://${module.s3["data_source_bucket"].s3_bucket_id}/${module.s3_object["dataset-object"].s3_object_id}"
+    location = "s3://${module.s3["scripts_source_bucket"].s3_bucket_id}/${module.s3_object["pre_processing_object"].s3_object_id}"
   }
   depends_on = [module.s3, module.s3_object]
 }
@@ -205,7 +205,7 @@ module "aws_glue_job" {
 
   command = {
     name            = "glueetl"
-    script_location = format("s3://%s/pre_processing.py", module.s3["data_source_bucket"].s3_bucket_id)
+    script_location = format("s3://%s/pre_processing.py", module.s3["scripts_source_bucket"].s3_bucket_id)
     python_version  = 3
   }
   role_arn        = module.glue_iam_role.arn
@@ -293,8 +293,9 @@ module "glue_trigger" {
 #   source = "./modules/terraform-aws-lambda"
 # }
 # 
-# module "aws_sagemaker" {
-#   source = "./modules/terraform-aws-sagemaker"
-# }
 
-# Sagemkaer
+module "sagemaker" {
+  source = "./modules/terraform-aws-sagemaker"
+
+
+}
