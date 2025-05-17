@@ -244,58 +244,39 @@ module "glue_trigger" {
 
 }
 
-# Iam
-#module "iam_role" {
-#  source   = "./modules/terraform-aws-iam/modules/iam-assumable-role"
-#  for_each = var.iam_role_config
-#
-#  trusted_role_actions              = each.value.trusted_role_actions
-#  trusted_role_arns                 = each.value.trusted_role_arns
-#  trusted_role_services             = each.value.trusted_role_services
-#  trust_policy_conditions           = each.value.trust_policy_conditions
-#  mfa_age                           = each.value.mfa_age
-#  max_session_duration              = each.value.max_session_duration
-#  create_role                       = each.value.create_role
-#  create_instance_profile           = each.value.create_instance_profile
-#  role_name                         = each.value.role_name
-#  role_name_prefix                  = each.value.role_name_prefix
-#  role_path                         = each.value.role_path
-#  role_requires_mfa                 = each.value.role_requires_mfa
-#  role_permissions_boundary_arn     = each.value.role_permissions_boundary_arn
-#  tags                              = each.value.tags
-#  custom_role_policy_arns           = each.value.custom_role_policy_arns
-#  custom_role_trust_policy          = each.value.custom_role_trust_policy
-#  create_custom_role_trust_policy   = each.value.create_custom_role_trust_policy
-#  number_of_custom_role_policy_arns = each.value.number_of_custom_role_policy_arns
-#  inline_policy_statements          = each.value.inline_policy_statements
-#  # Pre-defined policies
-#  admin_role_policy_arn      = each.value.admin_role_policy_arn
-#  poweruser_role_policy_arn  = each.value.poweruser_role_policy_arn
-#  readonly_role_policy_arn   = each.value.readonly_role_policy_arn
-#  attach_admin_policy        = each.value.attach_admin_policy
-#  attach_poweruser_policy    = each.value.attach_poweruser_policy
-#  attach_readonly_policy     = each.value.attach_readonly_policy
-#  force_detach_policies      = each.value.force_detach_policies
-#  role_description           = each.value.role_description
-#  role_sts_externalid        = each.value.role_sts_externalid
-#  allow_self_assume_role     = each.value.allow_self_assume_role
-#  role_requires_session_name = each.value.role_requires_session_name
-#  role_session_name          = each.value.role_session_name
-#}
-
-# Events
-# module "amazon_eventbridge" {
-#   source   = "./modules/terraform-aws-eventbridge"
-#   for_each = var.eventbridge_config
-# }
-# 
-# module "aws_lambda" {
-#   source = "./modules/terraform-aws-lambda"
-# }
-# 
-
+# Sagemaker
 module "sagemaker" {
   source = "./modules/terraform-aws-sagemaker"
 
-
+  s3_data_bucket_name = module.s3["data_source_bucket"].s3_bucket_id
+  s3_data_key         = module.s3_object["pre_processing_object"].s3_object_id
+  sagemaker_bucket    = module.s3["scripts_source_bucket"].s3_bucket_id
 }
+
+#module "lambda_function" {
+#  source = "./modules/terraform-aws-lambda"
+#
+#  function_name = var.lambda_function_config.function_name
+#  description   = var.lambda_function_config.description
+#
+#  handler = "index.lambda_handler"
+#  runtime = "python3.12"
+#  publish = true
+#
+#  create_package         = false
+#  local_existing_package = var.lambda_function_config.local_existing_package
+#
+#  attach_policy_statements = true
+#  policy_statements = {
+#    sagemaker = {
+#      effect = "Allow"
+#      actions = [
+#        "sagemaker:CreateModel",
+#        "sagemaker:CreateEndpointConfig",
+#        "sagemaker:CreateEndpoint",
+#        "sagemaker:UpdateEndpoint"
+#      ]
+#      resources = ["*"]
+#    }
+#  }
+#}

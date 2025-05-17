@@ -495,9 +495,12 @@ variable "vpc_endpoints_config" {
 }
 
 # SageMaker configurations
-variable "sagemaker_config" {
-  description = "SageMaker configurations."
-  type        = object({})
-  default     = {}
+variable "lambda_config" {
+  description = "Lambda configurations."
+  type = object({
+    function_name          = optional(string)
+    description            = optional(string)
+    local_existing_package = optional(string, "../lambda/deploy_model.zip")
+  })
+  default = {}
 }
-
