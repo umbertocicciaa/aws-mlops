@@ -19,49 +19,6 @@ resource "aws_sagemaker_pipeline" "mlops_regression" {
     ]
     Steps = [
       {
-        Name = "Preprocess"
-        Type = "Processing"
-        Arguments = {
-          ProcessingJobDefinition = {
-            AppSpecification = {
-              ImageUri            = data.aws_sagemaker_prebuilt_ecr_image.sklearn.registry_path
-              ContainerEntrypoint = ["python3"]
-            }
-            ProcessingInputs = [
-              {
-                InputName = "input-1"
-                S3Input = {
-                  S3Uri       = { "Get" : "Parameters.InputData" }
-                  LocalPath   = "/opt/ml/processing/input"
-                  S3DataType  = "S3Prefix"
-                  S3InputMode = "File"
-                }
-              }
-            ]
-            ProcessingOutputConfig = {
-              Outputs = [
-                {
-                  OutputName = "output-1"
-                  S3Output = {
-                    S3Uri        = "s3://your-bucket/processing/output/"
-                    LocalPath    = "/opt/ml/processing/output"
-                    S3UploadMode = "EndOfJob"
-                  }
-                }
-              ]
-            }
-            ResourceConfig = {
-              InstanceType   = "ml.m5.large"
-              InstanceCount  = 1
-              VolumeSizeInGB = 30
-            }
-            RoleArn     = aws_iam_role.example.arn
-            Code        = var.preprocess_script_bucket
-            Environment = {}
-          }
-        }
-      },
-      {
         Name = "TrainModel"
         Type = "Training"
         Arguments = {
@@ -75,7 +32,7 @@ resource "aws_sagemaker_pipeline" "mlops_regression" {
                 ChannelName = "train"
                 DataSource = {
                   S3DataSource = {
-                    S3Uri       = { "Get" : "Steps.Preprocess.ProcessingOutputConfig.Outputs[0].S3Output.S3Uri" }
+                    S3Uri       = { "Get" : "Parameters.InputData" }
                     S3DataType  = "S3Prefix"
                     S3InputMode = "File"
                   }
