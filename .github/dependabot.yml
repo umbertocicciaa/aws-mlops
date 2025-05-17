@@ -9,6 +9,16 @@ updates:
     directory: "/data-preprocessing/" 
     schedule:
       interval: "weekly"
+  
+  - package-ecosystem: "pip"
+    directory: "/lambda/" 
+    schedule:
+      interval: "weekly"
+
+  - package-ecosystem: "pip"
+    directory: "/pipeline/" 
+    schedule:
+      interval: "weekly"
       
   - package-ecosystem: "terraform"
     directory: "/iac/" 
