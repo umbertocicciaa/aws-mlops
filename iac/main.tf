@@ -244,6 +244,93 @@ module "glue_trigger" {
 
 }
 
+# eventbridge configuration
+module "event_bridge" {
+  source = "./modules/terraform-aws-eventbridge"
+
+  for_each = var.eventbridge_config
+
+  create                        = each.value.create
+  create_role                   = each.value.create_role
+  create_pipe_role_only         = each.value.create_pipe_role_only
+  create_bus                    = each.value.create_bus
+  create_rules                  = each.value.create_rules
+  create_targets                = each.value.create_targets
+  create_permissions            = each.value.create_permissions
+  create_archives               = each.value.create_archives
+  create_connections            = each.value.create_connections
+  create_api_destinations       = each.value.create_api_destinations
+  create_schemas_discoverer     = each.value.create_schemas_discoverer
+  create_schedule_groups        = each.value.create_schedule_groups
+  create_schedules              = each.value.create_schedules
+  create_pipes                  = each.value.create_pipes
+  append_rule_postfix           = each.value.append_rule_postfix
+  append_connection_postfix     = each.value.append_connection_postfix
+  append_destination_postfix    = each.value.append_destination_postfix
+  append_schedule_group_postfix = each.value.append_schedule_group_postfix
+  append_schedule_postfix       = each.value.append_schedule_postfix
+  append_pipe_postfix           = each.value.append_pipe_postfix
+
+  bus_name                       = each.value.bus_name
+  bus_description                = each.value.bus_description
+  event_source_name              = each.value.event_source_name
+  kms_key_identifier             = each.value.kms_key_identifier
+  schemas_discoverer_description = each.value.schemas_discoverer_description
+  rules                          = each.value.rules
+  targets                        = each.value.targets
+  archives                       = each.value.archives
+  permissions                    = each.value.permissions
+  connections                    = each.value.connections
+  api_destinations               = each.value.api_destinations
+  schedule_groups                = each.value.schedule_groups
+  schedules                      = each.value.schedules
+  pipes                          = each.value.pipes
+  tags                           = each.value.tags
+  schedule_group_timeouts        = each.value.schedule_group_timeouts
+
+  role_name                  = each.value.role_name
+  role_description           = each.value.role_description
+  role_path                  = each.value.role_path
+  policy_path                = each.value.policy_path
+  role_force_detach_policies = each.value.role_force_detach_policies
+  role_permissions_boundary  = each.value.role_permissions_boundary
+  role_tags                  = each.value.role_tags
+  ecs_pass_role_resources    = each.value.ecs_pass_role_resources
+
+  attach_kinesis_policy          = each.value.attach_kinesis_policy
+  attach_kinesis_firehose_policy = each.value.attach_kinesis_firehose_policy
+  attach_sqs_policy              = each.value.attach_sqs_policy
+  attach_sns_policy              = each.value.attach_sns_policy
+  attach_ecs_policy              = each.value.attach_ecs_policy
+  attach_lambda_policy           = each.value.attach_lambda_policy
+  attach_sfn_policy              = each.value.attach_sfn_policy
+  attach_cloudwatch_policy       = each.value.attach_cloudwatch_policy
+  attach_api_destination_policy  = each.value.attach_api_destination_policy
+  attach_tracing_policy          = each.value.attach_tracing_policy
+  kinesis_target_arns            = each.value.kinesis_target_arns
+  kinesis_firehose_target_arns   = each.value.kinesis_firehose_target_arns
+  sqs_target_arns                = each.value.sqs_target_arns
+  sns_target_arns                = each.value.sns_target_arns
+  sns_kms_arns                   = each.value.sns_kms_arns
+  ecs_target_arns                = each.value.ecs_target_arns
+  lambda_target_arns             = each.value.lambda_target_arns
+  sfn_target_arns                = each.value.sfn_target_arns
+  cloudwatch_target_arns         = each.value.cloudwatch_target_arns
+
+  attach_policy_json       = each.value.attach_policy_json
+  attach_policy_jsons      = each.value.attach_policy_jsons
+  attach_policy            = each.value.attach_policy
+  attach_policies          = each.value.attach_policies
+  number_of_policy_jsons   = each.value.number_of_policy_jsons
+  number_of_policies       = each.value.number_of_policies
+  attach_policy_statements = each.value.attach_policy_statements
+  trusted_entities         = each.value.trusted_entities
+  policy_json              = each.value.policy_json
+  policy_jsons             = each.value.policy_jsons
+  policies                 = each.value.policies
+  policy_statements        = each.value.policy_statements
+}
+
 # Sagemaker
 module "sagemaker" {
   source = "./modules/terraform-aws-sagemaker"
