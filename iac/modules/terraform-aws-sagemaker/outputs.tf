@@ -1,16 +1,9 @@
-# output variables 
-
-output "notebooks" {
-  description = "The attributes of the notebook instances"
-  value       = aws_sagemaker_notebook_instance.ni
+output "pipeline_name" {
+  description = "The name of the SageMaker pipeline."
+  value       = aws_sagemaker_pipeline.example.pipeline_name
 }
 
-output "security_group" {
-  description = "The attributes of security group for the sagemaker (studio)"
-  value       = aws_security_group.sagemaker
-}
-
-output "endpoints" {
-  description = "The attributes of sagemaker endpoints for inference"
-  value       = aws_sagemaker_endpoint_configuration.ep
+output "pipeline_display_name" {
+  description = "The name displayed of the SageMaker pipeline."
+  value       = aws_sagemaker_pipeline.example.pipeline_display_name
 }
