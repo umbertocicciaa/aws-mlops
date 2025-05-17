@@ -45,3 +45,15 @@ variable "model_evaluate_script_bucket" {
   description = "S3 path for the model artifacts."
   default     = "s3://your-bucket/evaluate.py"
 }
+
+variable "evaluation_output_bucket" {
+  type        = string
+  description = "Output bucket for the evaluation results."
+  default     = "s3://your-bucket/evaluation-results/"
+}
+
+variable "model_package_group_name" {
+  description = "Name of the SageMaker Model Package Group"
+  type        = string
+  default = "mlops-regression-model-group"
+}

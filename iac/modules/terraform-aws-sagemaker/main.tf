@@ -79,7 +79,16 @@ resource "aws_sagemaker_pipeline" "mlops_regression" {
               }
             ]
             ProcessingOutputConfig = {
-              Outputs = []
+              Outputs = [
+                {
+                  OutputName = "evaluation"
+                  S3Output = {
+                    S3Uri = var.evaluation_output_bucket
+                    LocalPath = "/opt/ml/processing/evaluation"
+                    S3UploadMode = "EndOfJob"
+                  }
+                }
+              ]
             }
             ResourceConfig = {
               InstanceType   = "ml.m5.large"
@@ -97,14 +106,24 @@ resource "aws_sagemaker_pipeline" "mlops_regression" {
         Type = "Condition"
         Arguments = {
           Conditions = [
-            # Add your condition logic here, e.g., compare evaluation metric to threshold
+            {
+              ConditionType = "LessThanOrEqualTo"
+              LeftValue = { "Get": "Steps.Evaluate.ProcessingOutputConfig.Outputs['evaluation'].OutputS3Uri" }
+              RightValue = { "Get": "Parameters.MSEThreshold" }
+            }          
           ]
           IfSteps = [
             {
               Name = "RegisterModel"
               Type = "Model"
               Arguments = {
-                # Model registration details here
+                ModelName = "mlops-regression-model"
+                PrimaryContainer = {
+                  Image = data.aws_sagemaker_prebuilt_ecr_image.xgboost.registry_path
+                  ModelDataUrl = { "Get": "Steps.TrainModel.ModelArtifacts.S3ModelArtifacts" }
+                }
+                ExecutionRoleArn = aws_iam_role.example.arn
+                ModelPackageGroupName = var.model_package_group_name
               }
             }
           ]
