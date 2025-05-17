@@ -342,49 +342,6 @@ variable "glue_job_config" {
   }
 }
 
-# IAM role configurations
-variable "iam_role_config" {
-  description = "IAM role configurations."
-  type = map(object({
-    trusted_role_actions  = optional(list(string), ["sts:AssumeRole", "sts:TagSession"])
-    trusted_role_arns     = optional(list(string), [])
-    trusted_role_services = optional(list(string), [])
-    trust_policy_conditions = optional(list(object({
-      test     = string
-      variable = string
-      values   = list(string)
-    })), [])
-    mfa_age                           = optional(number, 86400)
-    max_session_duration              = optional(number, 3600)
-    create_role                       = optional(bool, false)
-    create_instance_profile           = optional(bool, false)
-    role_name                         = optional(string, null)
-    role_name_prefix                  = optional(string, null)
-    role_path                         = optional(string, "/")
-    role_requires_mfa                 = optional(bool, true)
-    role_permissions_boundary_arn     = optional(string, "")
-    tags                              = optional(map(string), {})
-    custom_role_policy_arns           = optional(list(string), [])
-    custom_role_trust_policy          = optional(string, "")
-    create_custom_role_trust_policy   = optional(bool, false)
-    number_of_custom_role_policy_arns = optional(number, null)
-    inline_policy_statements          = optional(any, [])
-    admin_role_policy_arn             = optional(string, "arn:aws:iam::aws:policy/AdministratorAccess")
-    poweruser_role_policy_arn         = optional(string, "arn:aws:iam::aws:policy/PowerUserAccess")
-    readonly_role_policy_arn          = optional(string, "arn:aws:iam::aws:policy/ReadOnlyAccess")
-    attach_admin_policy               = optional(bool, false)
-    attach_poweruser_policy           = optional(bool, false)
-    attach_readonly_policy            = optional(bool, false)
-    force_detach_policies             = optional(bool, false)
-    role_description                  = optional(string, "")
-    role_sts_externalid               = optional(any, [])
-    allow_self_assume_role            = optional(bool, false)
-    role_requires_session_name        = optional(bool, false)
-    role_session_name                 = optional(list(string), ["$${aws:username}"])
-  }))
-  default = {}
-}
-
 # Eventbridge configurations
 variable "eventbridge_config" {
   description = "Event bridge configurations."
@@ -469,27 +426,6 @@ variable "eventbridge_config" {
     policies                 = optional(list(string), [])
     policy_statements        = optional(any, {})
 
-  }))
-  default = {}
-}
-
-# VPC configurations
-variable "vpc_endpoints_config" {
-  description = "Vpc endpoints configurations."
-  type = map(object({
-    create                     = optional(bool, true)
-    vpc_id                     = optional(string, null)
-    endpoints                  = optional(any, {})
-    security_group_ids         = optional(list(string), [])
-    subnet_ids                 = optional(list(string), [])
-    tags                       = optional(map(string), {})
-    create_security_group      = optional(bool, false)
-    security_group_name        = optional(string, null)
-    security_group_name_prefix = optional(string, null)
-    security_group_description = optional(string, null)
-    security_group_rules       = optional(any, {})
-    security_group_tags        = optional(map(string), {})
-    route_table_ids            = optional(list(string), [])
   }))
   default = {}
 }
