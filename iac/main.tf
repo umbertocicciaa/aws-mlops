@@ -247,10 +247,10 @@ module "glue_trigger" {
 module "glue_event_bridge" {
   source = "./modules/terraform-aws-eventbridge"
 
-  create                        = true
-  create_role                   = true
+  create      = true
+  create_role = true
   # create_pipe_role_only         = var.eventbridge_config.create_pipe_role_only
-  create_bus                    = false
+  create_bus = false
   # create_rules                  = var.eventbridge_config.create_rules
   # create_targets                = var.eventbridge_config.create_targets
   # create_permissions            = var.eventbridge_config.create_permissions
@@ -267,7 +267,7 @@ module "glue_event_bridge" {
   # append_schedule_group_postfix = var.eventbridge_config.append_schedule_group_postfix
   # append_schedule_postfix       = var.eventbridge_config.append_schedule_postfix
   # append_pipe_postfix           = var.eventbridge_config.append_pipe_postfix
-# 
+  # 
   # bus_name                       = var.eventbridge_config.bus_name
   # bus_description                = var.eventbridge_config.bus_description
   # event_source_name              = var.eventbridge_config.event_source_name
@@ -290,7 +290,7 @@ module "glue_event_bridge" {
   }
   targets = {
     glue_rule = {
-      arn = module.glue_workflow.arn
+      arn             = module.glue_workflow.arn
       attach_role_arn = true
     }
   }
