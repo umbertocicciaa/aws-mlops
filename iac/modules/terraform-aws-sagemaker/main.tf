@@ -34,7 +34,7 @@ resource "aws_iam_role_policy_attachment" "s3_full_access" {
 # Sagemaker
 resource "aws_sagemaker_pipeline" "mlops_pipeline" {
   pipeline_name         = "${var.project_name}-pipeline"
-  pipeline_display_name = "California Housing Regression Pipeline"
+  pipeline_display_name = "California-Housing-Regression-Pipeline"
   role_arn              = aws_iam_role.sagemaker_execution_role.arn
 
   pipeline_definition = jsonencode({
@@ -319,7 +319,7 @@ resource "aws_sagemaker_model_package_group" "model_package_group" {
   model_package_group_description = "Model package group for California Housing regression models"
 }
 
-resource "aws_sagemaker_endpoint_config" "endpoint_config" {
+resource "aws_sagemaker_endpoint_configuration" "endpoint_config" {
   name = "${var.project_name}-endpoint-config"
 
   production_variants {
@@ -336,5 +336,5 @@ resource "aws_sagemaker_endpoint_config" "endpoint_config" {
 
 resource "aws_sagemaker_endpoint" "endpoint" {
   name                 = "${var.project_name}-endpoint"
-  endpoint_config_name = aws_sagemaker_endpoint_config.endpoint_config.name
+  endpoint_config_name = aws_sagemaker_endpoint_configuration.endpoint_config.name
 }
