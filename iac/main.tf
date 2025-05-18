@@ -408,30 +408,3 @@ module "sagemaker" {
   sagemaker_bucket    = module.s3["scripts_source_bucket"].s3_bucket_id
 }
 
-#module "lambda_function" {
-#  source = "./modules/terraform-aws-lambda"
-#
-#  function_name = var.lambda_function_config.function_name
-#  description   = var.lambda_function_config.description
-#
-#  handler = "index.lambda_handler"
-#  runtime = "python3.12"
-#  publish = true
-#
-#  create_package         = false
-#  local_existing_package = var.lambda_function_config.local_existing_package
-#
-#  attach_policy_statements = true
-#  policy_statements = {
-#    sagemaker = {
-#      effect = "Allow"
-#      actions = [
-#        "sagemaker:CreateModel",
-#        "sagemaker:CreateEndpointConfig",
-#        "sagemaker:CreateEndpoint",
-#        "sagemaker:UpdateEndpoint"
-#      ]
-#      resources = ["*"]
-#    }
-#  }
-#}
