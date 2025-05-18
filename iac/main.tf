@@ -163,7 +163,6 @@ module "glue_crawler" {
   # table_prefix           = var.glue_crawler_config.table_prefix
   # security_configuration = var.glue_crawler_config.security_configuration
   schema_change_policy = {
-
     delete_behavior = "LOG"
     update_behavior = null
   }
@@ -290,7 +289,7 @@ module "glue_event_bridge" {
   }
   targets = {
     glue_rule = {
-      arn             = module.glue_workflow.arn
+      arn             = module.glue_trigger.arn
       attach_role_arn = true
     }
   }
