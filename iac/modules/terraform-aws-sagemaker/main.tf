@@ -59,6 +59,11 @@ resource "aws_sagemaker_pipeline" "mlops_pipeline" {
         "Name" : "DataS3Uri",
         "Type" : "String",
         "DefaultValue" : "s3://${var.s3_data_bucket_name}/${var.s3_data_key}"
+      },
+      {
+        "Name" : "RMSEThreshold",
+        "Type" : "Float",
+        "DefaultValue" : "0.6"
       }
     ],
     "Steps" : [
@@ -118,7 +123,7 @@ resource "aws_sagemaker_pipeline" "mlops_pipeline" {
           ],
           "AppSpecification" : {
             "ImageUri" : { "Fn::Join" : ["", ["${data.aws_caller_identity.current.account_id}", ".dkr.ecr.", "${data.aws_region.current.name}", ".amazonaws.com/sagemaker-scikit-learn:1.0-1"]] },
-            "ContainerEntrypoint" : ["python3", "/opt/ml/processing/input/training.py"]
+            "ContainerEntrypoint" : ["python3", "/opt/ml/processing/input/code/training.py"]
           },
           "ProcessingResources" : {
             "ClusterConfig" : {
@@ -239,7 +244,7 @@ resource "aws_sagemaker_pipeline" "mlops_pipeline" {
           ],
           "AppSpecification" : {
             "ImageUri" : { "Fn::Join" : ["", ["${data.aws_caller_identity.current.account_id}", ".dkr.ecr.", "${data.aws_region.current.name}", ".amazonaws.com/sagemaker-scikit-learn:1.0-1"]] },
-            "ContainerEntrypoint" : ["python3", "/opt/ml/processing/input/evaluate.py"]
+            "ContainerEntrypoint" : ["python3", "/opt/ml/processing/input/code/evaluate.py"]
           },
           "ProcessingResources" : {
             "ClusterConfig" : {
@@ -260,9 +265,11 @@ resource "aws_sagemaker_pipeline" "mlops_pipeline" {
             {
               "Type" : "LessThanOrEqualTo",
               "LeftValue" : {
-                "Get" : "Steps.ModelEvaluation.ProcessingOutputConfig.Outputs['evaluation'].S3Output.S3Uri"
+                "Get" : "JsonGet.RegressionMetrics.rmse",
+                "JsonPath" : "$.regression_metrics.rmse",
+                "S3Uri" : { "Get" : "Steps.ModelEvaluation.ProcessingOutputConfig.Outputs['evaluation'].S3Output.S3Uri" }
               },
-              "RightValue" : "0.6"
+              "RightValue" : { "Get" : "Parameters.RMSEThreshold" }
             }
           ]
         },
@@ -295,46 +302,43 @@ resource "aws_sagemaker_pipeline" "mlops_pipeline" {
           "SourceModelPackageName" : { "Get" : "Steps.ModelTraining.ModelArtifacts.S3ModelArtifacts" }
         },
         "DependsOn" : ["ModelEvaluationCheck"]
+      },
+      {
+        "Name" : "CreateModelStep",
+        "Type" : "Model",
+        "DependsOn" : ["RegisterModel"],
+        "Arguments" : {
+          "PrimaryContainer" : {
+            "ModelPackageName" : { "Get" : "Steps.RegisterModel.ModelPackageName" }
+          },
+          "ExecutionRoleArn" : "${aws_iam_role.sagemaker_execution_role.arn}"
+        }
+      },
+      {
+        "Name" : "DeploymentStep",
+        "Type" : "EndpointConfig",
+        "DependsOn" : ["CreateModelStep"],
+        "Arguments" : {
+          "EndpointConfigName" : "california-housing-endpoint-config",
+          "ProductionVariants" : [
+            {
+              "ModelName" : { "Get" : "Steps.CreateModelStep.ModelName" },
+              "VariantName" : "AllTraffic",
+              "InitialInstanceCount" : 1,
+              "InstanceType" : "ml.m5.large"
+            }
+          ]
+        }
+      },
+      {
+        "Name" : "EndpointDeploymentStep",
+        "Type" : "Endpoint",
+        "DependsOn" : ["DeploymentStep"],
+        "Arguments" : {
+          "EndpointName" : "california-housing-endpoint",
+          "EndpointConfigName" : { "Get" : "Steps.DeploymentStep.EndpointConfigName" }
+        }
       }
     ]
   })
-}
-
-resource "aws_sagemaker_model" "model" {
-  name               = "${var.project_name}-model"
-  execution_role_arn = aws_iam_role.sagemaker_execution_role.arn
-
-  primary_container {
-    image          = "683313688378.dkr.ecr.us-west-2.amazonaws.com/sagemaker-xgboost:1.5-1"
-    model_data_url = "s3://${var.sagemaker_bucket}/output/model/model.tar.gz"
-  }
-
-  # This resource depends on the pipeline execution which creates the model
-  # In a real scenario, you would have a mechanism to trigger this after model creation
-  depends_on = [aws_sagemaker_pipeline.mlops_pipeline]
-}
-
-resource "aws_sagemaker_model_package_group" "model_package_group" {
-  model_package_group_name        = "${var.project_name}-models"
-  model_package_group_description = "Model package group for California Housing regression models"
-}
-
-resource "aws_sagemaker_endpoint_configuration" "endpoint_config" {
-  name = "${var.project_name}-endpoint-config"
-
-  production_variants {
-    variant_name           = "default"
-    model_name             = aws_sagemaker_model.model.name
-    instance_type          = "ml.t2.medium"
-    initial_instance_count = 1
-  }
-
-  # This resource depends on the pipeline execution which registers the model
-  # In a real scenario, you would have a mechanism to trigger this after model registration
-  depends_on = [aws_sagemaker_pipeline.mlops_pipeline]
-}
-
-resource "aws_sagemaker_endpoint" "endpoint" {
-  name                 = "${var.project_name}-endpoint"
-  endpoint_config_name = aws_sagemaker_endpoint_configuration.endpoint_config.name
 }

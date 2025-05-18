@@ -22,9 +22,15 @@ os.makedirs(output_validation_path, exist_ok=True)
 os.makedirs(output_test_path, exist_ok=True)
 
 # Read the data
+data_file = None
 for file in os.listdir(input_data_path):
     if file.endswith('.parquet'):
         data_file = os.path.join(input_data_path, file)
+        break
+        
+if data_file is None:
+    raise ValueError("No parquet files found in the input directory")
+        
 print(f"Reading file: {data_file}")
 df = pd.read_parquet(data_file)
 
