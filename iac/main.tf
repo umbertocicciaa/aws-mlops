@@ -355,6 +355,50 @@ module "glue_event_bridge" {
   }
 }
 
+module "mlops_event_bridge" {
+  source = "./modules/terraform-aws-eventbridge"
+
+  create      = true
+  create_role = true
+  create_bus  = false
+
+  rules = {
+    parquet_upload_rule = {
+      name        = "parquet-upload-trigger-sagemaker"
+      description = "Trigger SageMaker pipeline when parquet files are uploaded"
+      event_pattern = jsonencode({
+        "source" : ["aws.s3"],
+        "detail-type" : ["Object Created"],
+        "detail" : {
+          "bucket" : {
+            "name" : ["${module.s3["pre_processed_data_bucket"].s3_bucket_id}"]
+          },
+          "object" : {
+            "key" : [{ "suffix" : ".parquet" }]
+          }
+        }
+      })
+    }
+  }
+
+  targets = {
+    parquet_upload_rule = [{
+      name            = "sagemaker-pipeline-trigger"
+      arn             = module.sagemaker.sagemaker_pipeline_arn
+      attach_role_arn = true
+    }]
+  }
+
+  attach_policy_statements = true
+  policy_statements = {
+    sagemaker = {
+      effect    = "Allow",
+      actions   = ["sagemaker:StartPipelineExecution"],
+      resources = ["${module.sagemaker.sagemaker_pipeline_arn}"],
+    },
+  }
+}
+
 # Sagemaker
 module "sagemaker" {
   source = "./modules/terraform-aws-sagemaker"
