@@ -273,7 +273,7 @@ module "glue_event_bridge" {
   # kms_key_identifier             = var.eventbridge_config.kms_key_identifier
   # schemas_discoverer_description = var.eventbridge_config.schemas_discoverer_description
   rules = {
-    glue_rule = {
+    gluerule = {
       name        = "trigger-glue-workflow"
       description = "Trigger Glue workflow based on specific events"
       event_pattern = jsonencode({
@@ -288,10 +288,13 @@ module "glue_event_bridge" {
     }
   }
   targets = {
-    glue_rule = {
-      arn             = module.glue_trigger.arn
-      attach_role_arn = true
-    }
+    gluerule = [
+      {
+        name            = "glue-trigger"
+        arn             = module.glue_trigger.arn
+        attach_role_arn = true
+      }
+    ]
   }
   # archives                = var.eventbridge_config.archives
   # permissions             = var.eventbridge_config.permissions
