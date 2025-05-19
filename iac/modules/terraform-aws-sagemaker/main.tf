@@ -32,6 +32,12 @@ resource "aws_iam_role_policy_attachment" "s3_full_access" {
 }
 
 # Sagemaker
+resource "aws_sagemaker_model_package_group" "model_package_group" {
+  model_package_group_name        = "${var.project_name}-models"
+  model_package_group_description = "Model package group for California Housing regression models"
+}
+
+# Main pipeline resource
 resource "aws_sagemaker_pipeline" "mlops_pipeline" {
   pipeline_name         = "${var.project_name}-pipeline"
   pipeline_display_name = "California-Housing-Regression-Pipeline"
@@ -265,7 +271,7 @@ resource "aws_sagemaker_pipeline" "mlops_pipeline" {
             {
               "Type" : "LessThanOrEqualTo",
               "LeftValue" : {
-                "Get" : "JsonGet.RegressionMetrics.rmse",
+                "Get" : "JsonGet",
                 "JsonPath" : "$.regression_metrics.rmse",
                 "S3Uri" : { "Get" : "Steps.ModelEvaluation.ProcessingOutputConfig.Outputs['evaluation'].S3Output.S3Uri" }
               },
