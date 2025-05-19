@@ -430,6 +430,14 @@ variable "eventbridge_config" {
   default = {}
 }
 
+variable "eventbridge_mlops_config" {
+  type = object({
+    role_name = optional(string, null)
+  })
+  default     = {}
+  description = "values for the eventbridge mlops module"
+}
+
 # SageMaker configurations
 variable "lambda_config" {
   description = "Lambda configurations."

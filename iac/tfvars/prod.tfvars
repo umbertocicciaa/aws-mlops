@@ -243,4 +243,12 @@ glue_job_config = {
   number_of_workers = 2
 }
 
+# eventbridge
+eventbridge_config = {
+  role_name = "prod-eventbridge-glue"
+}
+
+eventbridge_mlops_config = {
+  role_name = "prod-eventbridge-mlops"
+}
 
