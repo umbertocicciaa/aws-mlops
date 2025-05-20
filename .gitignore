@@ -1,3 +1,4 @@
 dev.env
 prod.env
 migrate-state.txt
+*.zip
