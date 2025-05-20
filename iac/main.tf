@@ -242,36 +242,59 @@ module "glue_trigger" {
 
 }
 
+# lambda
+data "archive_file" "lambda_archive" {
+    type        = "zip"
+    output_path = "../lambda/glue_trigger.zip"
+
+    source_dir  = "../lambda/"
+}
+
+module "lambda_function" {
+  source = "./modules/terraform-aws-lambda"
+
+  function_name = "trigger-glue-workflow-lambda"
+  description   = "Lambda function to trigger Glue workflow"
+  handler       = "glue_trigger.handler"
+  runtime       = "python3.12"
+  publish       = true
+
+  create_package         = false
+  local_existing_package = "${data.archive_file.lambda_archive.output_path}"
+  ignore_source_code_hash = false
+
+  environment_variables = {
+    GLUE_TRIGGER_NAME = "${module.glue_trigger.name}"
+  }
+
+  attach_policy_statements = true
+  policy_statements = {
+    glue = {
+      effect    = "Allow",
+      actions   = ["glue:StartTrigger"],
+      resources = ["${module.glue_trigger.arn}"]
+    }
+  }
+
+  depends_on = [module.glue_trigger]
+}
+
+resource "aws_lambda_permission" "allow_eventbridge" {
+  statement_id  = "AllowExecutionFromEventBridge"
+  action        = "lambda:InvokeFunction"
+  function_name = module.lambda_function.lambda_function_name
+  principal     = "events.amazonaws.com"
+  source_arn    = module.glue_event_bridge.eventbridge_rule_arns["gluerule"]
+}
+
 # eventbridge configuration
 module "glue_event_bridge" {
   source = "./modules/terraform-aws-eventbridge"
 
   create      = true
   create_role = true
-  # create_pipe_role_only         = var.eventbridge_config.create_pipe_role_only
-  create_bus = false
-  # create_rules                  = var.eventbridge_config.create_rules
-  # create_targets                = var.eventbridge_config.create_targets
-  # create_permissions            = var.eventbridge_config.create_permissions
-  # create_archives               = var.eventbridge_config.create_archives
-  # create_connections            = var.eventbridge_config.create_connections
-  # create_api_destinations       = var.eventbridge_config.create_api_destinations
-  # create_schemas_discoverer     = var.eventbridge_config.create_schemas_discoverer
-  # create_schedule_groups        = var.eventbridge_config.create_schedule_groups
-  # create_schedules              = var.eventbridge_config.create_schedules
-  # create_pipes                  = var.eventbridge_config.create_pipes
-  # append_rule_postfix           = var.eventbridge_config.append_rule_postfix
-  # append_connection_postfix     = var.eventbridge_config.append_connection_postfix
-  # append_destination_postfix    = var.eventbridge_config.append_destination_postfix
-  # append_schedule_group_postfix = var.eventbridge_config.append_schedule_group_postfix
-  # append_schedule_postfix       = var.eventbridge_config.append_schedule_postfix
-  # append_pipe_postfix           = var.eventbridge_config.append_pipe_postfix
-  # 
-  # bus_name                       = var.eventbridge_config.bus_name
-  # bus_description                = var.eventbridge_config.bus_description
-  # event_source_name              = var.eventbridge_config.event_source_name
-  # kms_key_identifier             = var.eventbridge_config.kms_key_identifier
-  # schemas_discoverer_description = var.eventbridge_config.schemas_discoverer_description
+  create_bus  = false
+
   rules = {
     gluerule = {
       name        = "trigger-glue-workflow"
@@ -290,62 +313,15 @@ module "glue_event_bridge" {
   targets = {
     gluerule = [
       {
-        name            = "glue-trigger"
-        arn             = module.glue_trigger.arn
-        attach_role_arn = true
+        name = "lambda-glue-trigger"
+        arn  = module.lambda_function.lambda_function_arn
       }
     ]
   }
-  # archives                = var.eventbridge_config.archives
-  # permissions             = var.eventbridge_config.permissions
-  # connections             = var.eventbridge_config.connections
-  # api_destinations        = var.eventbridge_config.api_destinations
-  # schedule_groups         = var.eventbridge_config.schedule_groups
-  # schedules               = var.eventbridge_config.schedules
-  # pipes                   = var.eventbridge_config.pipes
-  # tags                    = var.eventbridge_config.tags
-  # schedule_group_timeouts = var.eventbridge_config.schedule_group_timeouts
 
-  # role_name                  = var.eventbridge_config.role_name
-  # role_description           = var.eventbridge_config.role_description
-  # role_path                  = var.eventbridge_config.role_path
-  # policy_path                = var.eventbridge_config.policy_path
-  # role_force_detach_policies = var.eventbridge_config.role_force_detach_policies
-  # role_permissions_boundary  = var.eventbridge_config.role_permissions_boundary
-  # role_tags                  = var.eventbridge_config.role_tags
-  # ecs_pass_role_resources    = var.eventbridge_config.ecs_pass_role_resources
+  role_name = var.eventbridge_config.role_name
 
-  # attach_kinesis_policy          = var.eventbridge_config.attach_kinesis_policy
-  # attach_kinesis_firehose_policy = var.eventbridge_config.attach_kinesis_firehose_policy
-  # attach_sqs_policy              = var.eventbridge_config.attach_sqs_policy
-  # attach_sns_policy              = var.eventbridge_config.attach_sns_policy
-  # attach_ecs_policy              = var.eventbridge_config.attach_ecs_policy
-  # attach_lambda_policy           = var.eventbridge_config.attach_lambda_policy
-  # attach_sfn_policy              = var.eventbridge_config.attach_sfn_policy
-  # attach_cloudwatch_policy       = var.eventbridge_config.attach_cloudwatch_policy
-  # attach_api_destination_policy  = var.eventbridge_config.attach_api_destination_policy
-  # attach_tracing_policy          = var.eventbridge_config.attach_tracing_policy
-  # kinesis_target_arns            = var.eventbridge_config.kinesis_target_arns
-  # kinesis_firehose_target_arns   = var.eventbridge_config.kinesis_firehose_target_arns
-  # sqs_target_arns                = var.eventbridge_config.sqs_target_arns
-  # sns_target_arns                = var.eventbridge_config.sns_target_arns
-  # sns_kms_arns                   = var.eventbridge_config.sns_kms_arns
-  # ecs_target_arns                = var.eventbridge_config.ecs_target_arns
-  # lambda_target_arns             = var.eventbridge_config.lambda_target_arns
-  # sfn_target_arns                = var.eventbridge_config.sfn_target_arns
-  # cloudwatch_target_arns         = var.eventbridge_config.cloudwatch_target_arns
-
-  # attach_policy_json       = var.eventbridge_config.attach_policy_json
-  # attach_policy_jsons      = var.eventbridge_config.attach_policy_jsons
-  # attach_policy            = var.eventbridge_config.attach_policy
-  # attach_policies          = var.eventbridge_config.attach_policies
-  # number_of_policy_jsons   = var.eventbridge_config.number_of_policy_jsons
-  # number_of_policies       = var.eventbridge_config.number_of_policies
   attach_policy_statements = true
-  # trusted_entities         = var.eventbridge_config.trusted_entities
-  # policy_json              = var.eventbridge_config.policy_json
-  # policy_jsons             = var.eventbridge_config.policy_jsons
-  # policies                 = var.eventbridge_config.policies
   policy_statements = {
     glue = {
       effect    = "Allow",
@@ -389,6 +365,7 @@ module "mlops_event_bridge" {
     }]
   }
 
+  role_name                = var.eventbridge_mlops_config.role_name
   attach_policy_statements = true
   policy_statements = {
     sagemaker = {
