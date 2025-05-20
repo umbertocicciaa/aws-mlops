@@ -438,7 +438,7 @@ variable "eventbridge_mlops_config" {
   description = "values for the eventbridge mlops module"
 }
 
-# SageMaker configurations
+# lambda configurations
 variable "lambda_config" {
   description = "Lambda configurations."
   type = object({

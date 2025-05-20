@@ -244,10 +244,10 @@ module "glue_trigger" {
 
 # lambda
 data "archive_file" "lambda_archive" {
-    type        = "zip"
-    output_path = "../lambda/glue_trigger.zip"
+  type        = "zip"
+  output_path = "../lambda/glue_trigger.zip"
 
-    source_dir  = "../lambda/"
+  source_dir = "../lambda/"
 }
 
 module "lambda_function" {
@@ -259,8 +259,8 @@ module "lambda_function" {
   runtime       = "python3.12"
   publish       = true
 
-  create_package         = false
-  local_existing_package = "${data.archive_file.lambda_archive.output_path}"
+  create_package          = false
+  local_existing_package  = data.archive_file.lambda_archive.output_path
   ignore_source_code_hash = false
 
   environment_variables = {
