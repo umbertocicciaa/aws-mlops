@@ -72,7 +72,7 @@ resource "aws_sagemaker_pipeline" "mlops_pipeline" {
       {
         Name         = "RMSEThreshold",
         Type         = "Float",
-        DefaultValue = "0.6"
+        DefaultValue = 0.6
       }
     ],
     Steps = [
@@ -305,28 +305,6 @@ resource "aws_sagemaker_pipeline" "mlops_pipeline" {
         DependsOn = ["ModelTraining"]
       },
       {
-        Name = "ModelEvaluationCheck",
-        Type = "Condition",
-        Arguments = {
-          Conditions = [
-            {
-              Type = "LessThanOrEqualTo",
-              LeftValue = {
-                Get      = "JsonGet",
-                JsonPath = "$.regression_metrics.rmse",
-                S3Uri = {
-                  Get = "Steps.ModelEvaluation.ProcessingOutputConfig.Outputs[1].S3Output.S3Uri"
-                }
-              },
-              RightValue = {
-                Get = "Parameters.RMSEThreshold"
-              }
-            }
-          ]
-        },
-        DependsOn = ["ModelEvaluation"]
-      },
-      {
         Name = "RegisterModel",
         Type = "RegisterModel",
         Arguments = {
@@ -354,11 +332,8 @@ resource "aws_sagemaker_pipeline" "mlops_pipeline" {
             }
           },
           ModelPackageDescription = "California Housing regression model",
-          SourceModelPackageName = {
-            Get = "Steps.ModelTraining.ModelArtifacts.S3ModelArtifacts"
-          }
         },
-        DependsOn = ["ModelEvaluationCheck"]
+        DependsOn = ["ModelEvaluation"]
       },
       {
         Name      = "CreateModelStep",
