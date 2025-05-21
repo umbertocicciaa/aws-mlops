@@ -1,3 +1,4 @@
+import os
 from awsglue.context import GlueContext
 from awsglue.dynamicframe import DynamicFrame
 from pyspark.context import SparkContext
@@ -9,7 +10,7 @@ db_name = "housings"
 tbl_name = "housings_table"
 
 # S3 location for output
-output_dir = "s3://llUY-pre-processed-data-bucket/housing_parquet"
+output_dir = os.environ.get("OUTPUT_DIR")
 
 # Read data into a DynamicFrame using the Data Catalog metadata
 housing_dyf = glueContext.create_dynamic_frame.from_catalog(database=db_name, table_name=tbl_name)

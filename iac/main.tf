@@ -27,32 +27,30 @@ module "s3_object" {
 module "s3_object_dataset" {
   source        = "./modules/terraform-aws-s3-bucket/modules/object"
   bucket        = module.s3["data_source_bucket"].s3_bucket_id
-  key           = var.s3_object_dataset_config.key
+  key           = "input/${var.s3_object_dataset_config.key}"
   file_source   = var.s3_object_dataset_config.file_source
   etag          = filemd5("${var.s3_object_dataset_config.file_source}")
   force_destroy = var.s3_object_dataset_config.force_destroy
 }
 
 # Etl Preprocessing
-module "glue_catalog_database" {
-  source = "./modules/terraform-aws-glue/modules/glue-catalog-database"
+module "glue_crawler_trigger" {
+  source = "./modules/terraform-aws-glue/modules/glue-trigger"
 
-  catalog_database_name        = var.glue_catalog_database_config.catalog_database_name
-  catalog_database_description = var.glue_catalog_database_config.catalog_database_description
-  location_uri                 = "s3://${module.s3["data_source_bucket"].s3_bucket_id}/${module.s3_object_dataset.s3_object_id}"
-  depends_on                   = [module.s3, module.s3_object, module.s3_object_dataset]
-}
+  name                = "prod-crawler-trigger-elt-preprocessing"
+  workflow_name       = module.glue_workflow.name
+  trigger_enabled     = true
+  start_on_creation   = false
+  trigger_description = "Glue Trigger that runs crawler on S3 upload"
+  type                = "EVENT"
 
-module "glue_catalog_table" {
-  source = "./modules/terraform-aws-glue/modules/glue-catalog-table"
+  actions = [
+    {
+      crawler_name = module.glue_crawler.name
+    }
+  ]
 
-  catalog_table_name        = var.glue_catalog_table_config.catalog_table_name
-  catalog_table_description = var.glue_catalog_table_config.catalog_table_description
-  database_name             = module.glue_catalog_database.name
-  storage_descriptor = {
-    location_uri = "s3://${module.s3["data_source_bucket"].s3_bucket_id}/${module.s3_object_dataset.s3_object_id}"
-  }
-  depends_on = [module.s3, module.s3_object]
+  depends_on = [module.glue_crawler]
 }
 
 module "glue_crawler" {
@@ -64,10 +62,9 @@ module "glue_crawler" {
   crawler_description = var.glue_crawler_config.crawler_description
   schedule            = var.glue_crawler_config.schedule
 
-  catalog_target = [
+  s3_target = [
     {
-      database_name = module.glue_catalog_database.name
-      tables        = [module.glue_catalog_table.name]
+      path = "s3://${module.s3["data_source_bucket"].s3_bucket_id}/input/"
     }
   ]
 
@@ -77,31 +74,42 @@ module "glue_crawler" {
   }
 }
 
-module "glue_iam_role" {
-  source  = "cloudposse/iam-role/aws"
-  version = "0.21.0"
+module "glue_catalog_database" {
+  source = "./modules/terraform-aws-glue/modules/glue-catalog-database"
 
-  name = "glue-iam-role"
-  principals = {
-    "Service" = ["glue.amazonaws.com"]
-  }
-
-  managed_policy_arns = [
-    "arn:aws:iam::aws:policy/service-role/AWSGlueServiceRole"
-  ]
-
-  policy_document_count = 0
-  policy_description    = "Policy for AWS Glue with access to EC2, S3, and Cloudwatch Logs"
-  role_description      = "Role for AWS Glue with access to EC2, S3, and Cloudwatch Logs"
+  catalog_database_name        = var.glue_catalog_database_config.catalog_database_name
+  catalog_database_description = var.glue_catalog_database_config.catalog_database_description
+  location_uri                 = "s3://${module.s3["data_source_bucket"].s3_bucket_id}/input/"
+  depends_on                   = [module.s3, module.s3_object, module.s3_object_dataset]
 }
 
-module "glue_workflow" {
-  source = "./modules/terraform-aws-glue/modules/glue-workflow"
+module "glue_job_trigger" {
+  source = "./modules/terraform-aws-glue/modules/glue-trigger"
 
-  name                 = "glue-workflow-elt-preprocessing"
-  workflow_name        = var.glue_workflow_config.workflow_name
-  workflow_description = var.glue_workflow_config.workflow_description
-  max_concurrent_runs  = var.glue_workflow_config.max_concurrent_runs
+  name                = "prod-job-trigger-elt-preprocessing"
+  workflow_name       = module.glue_workflow.name
+  trigger_enabled     = true
+  start_on_creation   = false
+  trigger_description = "Glue Trigger that runs job after crawler succeeds"
+  type                = "CONDITIONAL"
+
+  actions = [
+    {
+      job_name = module.aws_glue_job.name
+      timeout  = 10
+    }
+  ]
+
+  predicate = {
+    conditions = [
+      {
+        crawler_name = module.glue_crawler.name
+        crawl_state  = "SUCCEEDED"
+      }
+    ]
+  }
+
+  depends_on = [module.glue_crawler, module.aws_glue_job]
 }
 
 module "aws_glue_job" {
@@ -120,25 +128,126 @@ module "aws_glue_job" {
   max_retries       = var.glue_job_config.max_retries
   worker_type       = var.glue_job_config.worker_type
   number_of_workers = var.glue_job_config.number_of_workers
+
+  # Pass environment variables to the Glue job script
+  default_arguments = merge(
+    {
+      "--OUTPUT_DIR" = module.s3["pre_processed_data_bucket"].s3_bucket_id
+    },
+    var.glue_job_config.default_arguments
+  )
 }
 
-module "glue_trigger" {
-  source = "./modules/terraform-aws-glue/modules/glue-trigger"
+# Glue policy
+data "aws_iam_policy_document" "glue_policy_crud" {
+  statement {
+    sid    = "BaseAccess"
+    effect = "Allow"
 
-  name                = "prod-trigger-elt-preprocessing"
-  workflow_name       = module.glue_workflow.name
-  trigger_enabled     = true
-  start_on_creation   = false
-  trigger_description = "Glue Trigger that triggers a Glue Job on a schedule"
-  type                = "EVENT"
+    actions = [
+      "s3:GetObject",
+      "s3:PutObject",
+      "s3:DeleteObject"
+    ]
 
-  actions = [
-    {
-      job_name = module.aws_glue_job.name
-      timeout  = 10
-    }
+    resources = [
+      "${module.s3["scripts_source_bucket"].s3_bucket_arn}/*",
+      "${module.s3["data_source_bucket"].s3_bucket_arn}/*",
+      "${module.s3["pre_processed_data_bucket"].s3_bucket_arn}/*"
+    ]
+  }
+}
+
+data "aws_iam_policy_document" "glue_policy_list" {
+  statement {
+    sid    = "FullAccess"
+    effect = "Allow"
+    resources = [
+      module.s3["scripts_source_bucket"].s3_bucket_arn,
+      module.s3["data_source_bucket"].s3_bucket_arn,
+      module.s3["pre_processed_data_bucket"].s3_bucket_arn
+    ]
+
+    actions = [
+      "s3:ListBucket"
+    ]
+  }
+}
+
+module "glue_iam_role" {
+  source  = "cloudposse/iam-role/aws"
+  version = "0.21.0"
+
+  name = "glue-iam-role"
+  principals = {
+    "Service" = ["glue.amazonaws.com"]
+  }
+
+  managed_policy_arns = [
+    "arn:aws:iam::aws:policy/service-role/AWSGlueServiceRole"
   ]
 
+  policy_documents = [
+    data.aws_iam_policy_document.glue_policy_crud.json,
+    data.aws_iam_policy_document.glue_policy_list.json
+  ]
+
+  policy_document_count = 2
+  policy_description    = "Policy for AWS Glue with access to EC2, S3, and Cloudwatch Logs"
+  role_description      = "Role for AWS Glue with access to EC2, S3, and Cloudwatch Logs"
+}
+
+module "glue_event_bridge" {
+  source = "./modules/terraform-aws-eventbridge"
+
+  create      = true
+  create_role = true
+  create_bus  = false
+
+  rules = {
+    gluerule = {
+      name        = "trigger-glue-workflow"
+      description = "Trigger Glue workflow based on specific events"
+      event_pattern = jsonencode({
+        "source" : ["aws.s3"],
+        "detail-type" : ["Object Created"],
+        "detail" : {
+          "bucket" : {
+            "name" : ["${module.s3["data_source_bucket"].s3_bucket_id}/input/"]
+          }
+        }
+      })
+    }
+  }
+  targets = {
+    gluerule = [
+      {
+        name = "lambda-glue-trigger"
+        arn  = module.lambda_function.lambda_function_arn
+      }
+    ]
+  }
+
+  role_name = var.eventbridge_config.role_name
+
+  attach_policy_statements = true
+  policy_statements = {
+    glue = {
+      effect    = "Allow",
+      actions   = ["glue:StartTrigger"],
+      resources = ["${module.glue_job_trigger.arn}"],
+    },
+  }
+}
+
+# Glue workflow
+module "glue_workflow" {
+  source = "./modules/terraform-aws-glue/modules/glue-workflow"
+
+  name                 = "glue-workflow-elt-preprocessing"
+  workflow_name        = var.glue_workflow_config.workflow_name
+  workflow_description = var.glue_workflow_config.workflow_description
+  max_concurrent_runs  = var.glue_workflow_config.max_concurrent_runs
 }
 
 # lambda
@@ -163,19 +272,22 @@ module "lambda_function" {
   ignore_source_code_hash = false
 
   environment_variables = {
-    GLUE_TRIGGER_NAME = "${module.glue_trigger.name}"
+    GLUE_TRIGGER_NAME = module.glue_crawler_trigger.name
   }
 
   attach_policy_statements = true
   policy_statements = {
     glue = {
-      effect    = "Allow",
-      actions   = ["glue:StartTrigger"],
-      resources = ["${module.glue_trigger.arn}"]
+      effect  = "Allow",
+      actions = ["glue:StartTrigger"],
+      resources = [
+        module.glue_crawler_trigger.arn,
+        module.glue_job_trigger.arn
+      ]
     }
   }
 
-  depends_on = [module.glue_trigger]
+  depends_on = [module.glue_crawler_trigger]
 }
 
 resource "aws_lambda_permission" "allow_eventbridge" {
@@ -186,48 +298,13 @@ resource "aws_lambda_permission" "allow_eventbridge" {
   source_arn    = module.glue_event_bridge.eventbridge_rule_arns["gluerule"]
 }
 
-# eventbridge configuration
-module "glue_event_bridge" {
-  source = "./modules/terraform-aws-eventbridge"
+# Sagemaker
+module "sagemaker" {
+  source = "./modules/terraform-aws-sagemaker"
 
-  create      = true
-  create_role = true
-  create_bus  = false
-
-  rules = {
-    gluerule = {
-      name        = "trigger-glue-workflow"
-      description = "Trigger Glue workflow based on specific events"
-      event_pattern = jsonencode({
-        "source" : ["aws.s3"],
-        "detail-type" : ["Object Created"],
-        "detail" : {
-          "bucket" : {
-            "name" : ["${module.s3["data_source_bucket"].s3_bucket_id}"]
-          }
-        }
-      })
-    }
-  }
-  targets = {
-    gluerule = [
-      {
-        name = "lambda-glue-trigger"
-        arn  = module.lambda_function.lambda_function_arn
-      }
-    ]
-  }
-
-  role_name = var.eventbridge_config.role_name
-
-  attach_policy_statements = true
-  policy_statements = {
-    glue = {
-      effect    = "Allow",
-      actions   = ["glue:StartTrigger"],
-      resources = ["${module.glue_trigger.arn}"],
-    },
-  }
+  s3_data_bucket_name = module.s3["data_source_bucket"].s3_bucket_id
+  s3_data_key         = module.s3_object["pre_processing_object"].s3_object_id
+  sagemaker_bucket    = module.s3["scripts_source_bucket"].s3_bucket_id
 }
 
 module "mlops_event_bridge" {
@@ -273,14 +350,5 @@ module "mlops_event_bridge" {
       resources = ["${module.sagemaker.sagemaker_pipeline_arn}"],
     },
   }
-}
-
-# Sagemaker
-module "sagemaker" {
-  source = "./modules/terraform-aws-sagemaker"
-
-  s3_data_bucket_name = module.s3["data_source_bucket"].s3_bucket_id
-  s3_data_key         = module.s3_object["pre_processing_object"].s3_object_id
-  sagemaker_bucket    = module.s3["scripts_source_bucket"].s3_bucket_id
 }
 
