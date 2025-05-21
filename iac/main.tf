@@ -40,7 +40,7 @@ module "glue_catalog_database" {
   catalog_database_name        = var.glue_catalog_database_config.catalog_database_name
   catalog_database_description = var.glue_catalog_database_config.catalog_database_description
   location_uri                 = "s3://${module.s3["data_source_bucket"].s3_bucket_id}/${module.s3_object_dataset.s3_object_id}"
-  depends_on                   = [module.s3, module.s3_object, s3_object_dataset]
+  depends_on                   = [module.s3, module.s3_object, module.s3_object_dataset]
 }
 
 module "glue_catalog_table" {
