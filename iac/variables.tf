@@ -107,6 +107,18 @@ variable "s3_object_config" {
   default = {}
 }
 
+variable "s3_object_dataset_config" {
+  description = "S3 object dataset configurations."
+  type = object({
+    create        = optional(bool, true)
+    bucket        = optional(string, "")
+    key           = optional(string, "")
+    file_source   = optional(string, null)
+    force_destroy = optional(bool, true)
+  })
+  default = {}
+}
+
 # Glue configurations
 variable "glue_catalog_database_config" {
   description = "Glue catalog database configurations."
