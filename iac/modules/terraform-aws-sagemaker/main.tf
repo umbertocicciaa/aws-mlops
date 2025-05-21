@@ -147,7 +147,7 @@ resource "aws_sagemaker_pipeline" "mlops_pipeline" {
             ClusterConfig = {
               InstanceCount = 1,
               InstanceType = {
-                "Get" : "Parameters.ProcessingInstanceType"
+                Get = "Parameters.ProcessingInstanceType"
               },
               VolumeSizeInGB = 30
             }
@@ -170,7 +170,7 @@ resource "aws_sagemaker_pipeline" "mlops_pipeline" {
                 S3DataSource = {
                   S3DataType = "S3Prefix",
                   S3Uri = {
-                    Get : "Steps.DataPreprocessing.ProcessingOutputConfig.Outputs[0].S3Output.S3Uri"
+                    Get = "Steps.DataPreprocessing.ProcessingOutputConfig.Outputs[0].S3Output.S3Uri"
                   },
                   S3DataDistributionType = "FullyReplicated"
                 }
