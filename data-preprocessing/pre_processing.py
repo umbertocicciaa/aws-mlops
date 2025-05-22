@@ -14,7 +14,7 @@ tbl_name = "input"
 args = getResolvedOptions(sys.argv,
                           ['JOB_NAME',
                            'OUTPUT_DIR',])
-output_dir = args['OUTPUT_DIR']
+output_dir = "s3://" + args['OUTPUT_DIR']
 
 # Read data into a DynamicFrame using the Data Catalog metadata
 housing_dyf = glueContext.create_dynamic_frame.from_catalog(database=db_name, table_name=tbl_name)
