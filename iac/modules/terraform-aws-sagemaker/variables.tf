@@ -9,13 +9,8 @@ variable "s3_data_bucket_name" {
   type        = string
 }
 
-variable "sagemaker_bucket" {
+variable "scripts_bucket" {
   description = "S3 bucket where scripts are stored"
-  type        = string
-}
-
-variable "s3_data_key" {
-  description = "S3 key where parquet data is stored"
   type        = string
 }
 

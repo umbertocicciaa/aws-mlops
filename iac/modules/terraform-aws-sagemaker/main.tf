@@ -31,6 +31,31 @@ resource "aws_iam_role_policy_attachment" "s3_full_access" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonS3FullAccess"
 }
 
+resource "aws_iam_policy" "sagemaker_ecr_policy" {
+  name        = "${var.project_name}-sagemaker-ecr-policy"
+  description = "Allow SageMaker to pull images from ECR"
+
+  policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [
+      {
+        Effect = "Allow",
+        Action = [
+          "ecr:GetDownloadUrlForLayer",
+          "ecr:BatchGetImage",
+          "ecr:GetAuthorizationToken"
+        ],
+        Resource = "*"
+      }
+    ]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "sagemaker_ecr_policy_attachment" {
+  role       = aws_iam_role.sagemaker_execution_role.name
+  policy_arn = aws_iam_policy.sagemaker_ecr_policy.arn
+}
+
 # Sagemaker domain
 resource "aws_sagemaker_domain" "studio" {
   domain_name = var.domain_name
@@ -59,7 +84,8 @@ resource "aws_sagemaker_model_package_group" "model_package_group" {
 }
 
 locals {
-  sklearn_image_uri = "683313688378.dkr.ecr.${data.aws_region.current.name}.amazonaws.com/sagemaker-scikit-learn:1.0-1-cpu-py3"
+  sklearn_image_uri = "659782779980.dkr.ecr.eu-west-3.amazonaws.com/sagemaker-scikit-learn:0.23-1-cpu-py3"
+  xgboost_image_uri = "659782779980.dkr.ecr.eu-west-3.amazonaws.com/sagemaker-xgboost:1.7-1"
 }
 
 resource "aws_sagemaker_pipeline" "mlops_pipeline" {
@@ -88,7 +114,7 @@ resource "aws_sagemaker_pipeline" "mlops_pipeline" {
       {
         Name         = "DataS3Uri",
         Type         = "String",
-        DefaultValue = "s3://${var.s3_data_bucket_name}"
+        DefaultValue = "s3://${var.s3_data_bucket_name}/"
       },
       {
         Name         = "RMSEThreshold",
@@ -110,7 +136,7 @@ resource "aws_sagemaker_pipeline" "mlops_pipeline" {
               InputName  = "code",
               AppManaged = false,
               S3Input = {
-                S3Uri                  = "s3://${var.sagemaker_bucket}/training.py",
+                S3Uri                  = "s3://${var.scripts_bucket}/training.py",
                 LocalPath              = "/opt/ml/processing/input/code",
                 S3DataType             = "S3Prefix",
                 S3InputMode            = "File",
@@ -139,7 +165,7 @@ resource "aws_sagemaker_pipeline" "mlops_pipeline" {
                 OutputName = "train",
                 AppManaged = false,
                 S3Output = {
-                  S3Uri        = "s3://${var.sagemaker_bucket}/output/preprocessing/train",
+                  S3Uri        = "s3://${var.s3_data_bucket_name}/output/preprocessing/train",
                   LocalPath    = "/opt/ml/processing/output/train",
                   S3UploadMode = "EndOfJob"
                 }
@@ -148,7 +174,7 @@ resource "aws_sagemaker_pipeline" "mlops_pipeline" {
                 OutputName = "validation",
                 AppManaged = false,
                 S3Output = {
-                  S3Uri        = "s3://${var.sagemaker_bucket}/output/preprocessing/validation",
+                  S3Uri        = "s3://${var.s3_data_bucket_name}/output/preprocessing/validation",
                   LocalPath    = "/opt/ml/processing/output/validation",
                   S3UploadMode = "EndOfJob"
                 }
@@ -157,7 +183,7 @@ resource "aws_sagemaker_pipeline" "mlops_pipeline" {
                 OutputName = "test",
                 AppManaged = false,
                 S3Output = {
-                  S3Uri        = "s3://${var.sagemaker_bucket}/output/preprocessing/test",
+                  S3Uri        = "s3://${var.s3_data_bucket_name}/output/preprocessing/test",
                   LocalPath    = "/opt/ml/processing/output/test",
                   S3UploadMode = "EndOfJob"
                 }
@@ -181,7 +207,7 @@ resource "aws_sagemaker_pipeline" "mlops_pipeline" {
         Type = "Training",
         Arguments = {
           AlgorithmSpecification = {
-            TrainingImage     = "683313688378.dkr.ecr.us-west-2.amazonaws.com/sagemaker-xgboost:1.5-1",
+            TrainingImage     = local.xgboost_image_uri,
             TrainingInputMode = "File"
           },
           InputDataConfig = [
@@ -215,7 +241,7 @@ resource "aws_sagemaker_pipeline" "mlops_pipeline" {
             }
           ],
           OutputDataConfig = {
-            S3OutputPath = "s3://${var.sagemaker_bucket}/output/model"
+            S3OutputPath = "s3://${var.s3_data_bucket_name}/output/model"
           },
           ResourceConfig = {
             InstanceCount = 1,
@@ -253,7 +279,7 @@ resource "aws_sagemaker_pipeline" "mlops_pipeline" {
               InputName  = "code",
               AppManaged = false,
               S3Input = {
-                S3Uri                  = "s3://${var.sagemaker_bucket}/evaluate.py",
+                S3Uri                  = "s3://${var.scripts_bucket}/evaluate.py",
                 LocalPath              = "/opt/ml/processing/input/code",
                 S3DataType             = "S3Prefix",
                 S3InputMode            = "File",
@@ -296,7 +322,7 @@ resource "aws_sagemaker_pipeline" "mlops_pipeline" {
                 OutputName = "metrics",
                 AppManaged = false,
                 S3Output = {
-                  S3Uri        = "s3://${var.sagemaker_bucket}/output/metrics",
+                  S3Uri        = "s3://${var.s3_data_bucket_name}/output/metrics",
                   LocalPath    = "/opt/ml/processing/output/metrics",
                   S3UploadMode = "EndOfJob"
                 }
@@ -305,7 +331,7 @@ resource "aws_sagemaker_pipeline" "mlops_pipeline" {
                 OutputName = "evaluation",
                 AppManaged = false,
                 S3Output = {
-                  S3Uri        = "s3://${var.sagemaker_bucket}/output/evaluation",
+                  S3Uri        = "s3://${var.s3_data_bucket_name}/output/evaluation",
                   LocalPath    = "/opt/ml/processing/output/evaluation",
                   S3UploadMode = "EndOfJob"
                 }
@@ -336,7 +362,7 @@ resource "aws_sagemaker_pipeline" "mlops_pipeline" {
           InferenceSpecification = {
             Containers = [
               {
-                Image = "683313688378.dkr.ecr.us-west-2.amazonaws.com/sagemaker-xgboost:1.5-1"
+                Image = local.xgboost_image_uri
               }
             ],
             SupportedContentTypes      = ["text/csv"],

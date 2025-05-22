@@ -304,9 +304,8 @@ resource "aws_lambda_permission" "allow_eventbridge" {
 module "sagemaker" {
   source = "./modules/terraform-aws-sagemaker"
 
-  s3_data_bucket_name = module.s3["data_source_bucket"].s3_bucket_id
-  s3_data_key         = module.s3_object["pre_processing_object"].s3_object_id
-  sagemaker_bucket    = module.s3["scripts_source_bucket"].s3_bucket_id
+  s3_data_bucket_name = module.s3["pre_processed_data_bucket"].s3_bucket_id
+  scripts_bucket      = module.s3["scripts_source_bucket"].s3_bucket_id
 
   vpc_id             = var.sagemaker_config.vpc_id
   subnet_ids         = var.sagemaker_config.subnet_ids
