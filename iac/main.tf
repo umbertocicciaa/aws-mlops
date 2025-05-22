@@ -42,7 +42,7 @@ module "glue_crawler_trigger" {
   trigger_enabled     = true
   start_on_creation   = false
   trigger_description = "Glue Trigger that runs crawler on S3 upload"
-  type                = "EVENT"
+  type                = "ON_DEMAND"
 
   actions = [
     {
@@ -213,7 +213,7 @@ module "glue_event_bridge" {
         "detail-type" : ["Object Created"],
         "detail" : {
           "bucket" : {
-            "name" : ["${module.s3["data_source_bucket"].s3_bucket_id}/input/"]
+            "name" : ["${module.s3["data_source_bucket"].s3_bucket_id}"]
           }
         }
       })
