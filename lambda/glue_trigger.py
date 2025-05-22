@@ -6,10 +6,7 @@ def handler(event, context):
     trigger_name = os.environ.get('GLUE_TRIGGER_NAME')
 
     try:
-        params = {
-            'Name': trigger_name
-        }
-        glue.start_trigger(**params)
+        glue.start_trigger(Name=trigger_name)
         return {
             'statusCode': 200,
             'body': 'Successfully triggered Glue workflow'
