@@ -21,6 +21,7 @@ module "s3_object" {
   key           = each.value.key
   file_source   = each.value.file_source
   etag          = filemd5("${each.value.file_source}")
+  source_hash   = filemd5(each.value.file_source)
   force_destroy = each.value.force_destroy
 }
 
@@ -31,6 +32,7 @@ module "s3_object_dataset" {
   file_source   = var.s3_object_dataset_config.file_source
   etag          = filemd5("${var.s3_object_dataset_config.file_source}")
   force_destroy = var.s3_object_dataset_config.force_destroy
+  source_hash   = filemd5(var.s3_object_dataset_config.file_source)
 }
 
 # Etl Preprocessing
