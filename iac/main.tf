@@ -307,6 +307,12 @@ module "sagemaker" {
   s3_data_bucket_name = module.s3["data_source_bucket"].s3_bucket_id
   s3_data_key         = module.s3_object["pre_processing_object"].s3_object_id
   sagemaker_bucket    = module.s3["scripts_source_bucket"].s3_bucket_id
+
+  vpc_id             = var.sagemaker_config.vpc_id
+  subnet_ids         = var.sagemaker_config.subnet_ids
+  domain_name        = var.sagemaker_config.domain_name
+  user_profile_name  = var.sagemaker_config.user_profile_name
+  security_group_ids = var.sagemaker_config.security_group_ids
 }
 
 module "mlops_event_bridge" {
@@ -326,9 +332,6 @@ module "mlops_event_bridge" {
         "detail" : {
           "bucket" : {
             "name" : ["${module.s3["pre_processed_data_bucket"].s3_bucket_id}"]
-          },
-          "object" : {
-            "key" : [{ "suffix" : ".parquet" }]
           }
         }
       })
@@ -340,6 +343,9 @@ module "mlops_event_bridge" {
       name            = "sagemaker-pipeline-trigger"
       arn             = module.sagemaker.sagemaker_pipeline_arn
       attach_role_arn = true
+      input = jsonencode({
+        ExecutionName = "parquet-upload-execution"
+      })
     }]
   }
 

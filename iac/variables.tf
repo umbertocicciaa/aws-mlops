@@ -460,3 +460,16 @@ variable "lambda_config" {
   })
   default = {}
 }
+
+# SageMaker configurations
+variable "sagemaker_config" {
+  description = "SageMaker configurations."
+  type = object({
+    vpc_id             = optional(string, null)
+    subnet_ids         = optional(set(string), [])
+    domain_name        = optional(string, null)
+    security_group_ids = optional(set(string), [])
+    user_profile_name  = optional(string, null)
+  })
+  default = {}
+}

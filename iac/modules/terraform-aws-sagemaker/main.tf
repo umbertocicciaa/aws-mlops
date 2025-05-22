@@ -31,14 +31,35 @@ resource "aws_iam_role_policy_attachment" "s3_full_access" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonS3FullAccess"
 }
 
-# Sagemaker
+# Sagemaker domain
+resource "aws_sagemaker_domain" "studio" {
+  domain_name = var.domain_name
+  auth_mode   = "IAM"
+  vpc_id      = var.vpc_id
+  subnet_ids  = var.subnet_ids
+
+  default_user_settings {
+    execution_role = aws_iam_role.sagemaker_execution_role.arn
+  }
+}
+
+resource "aws_sagemaker_user_profile" "user" {
+  domain_id         = aws_sagemaker_domain.studio.id
+  user_profile_name = var.user_profile_name
+  user_settings {
+    execution_role  = aws_iam_role.sagemaker_execution_role.arn
+    security_groups = var.security_group_ids
+  }
+}
+
+# Sagemaker pipeline
 resource "aws_sagemaker_model_package_group" "model_package_group" {
   model_package_group_name        = "${var.project_name}-models"
   model_package_group_description = "Model package group for California Housing regression models"
 }
 
 locals {
-  sklearn_image_uri = "${data.aws_caller_identity.current.account_id}.dkr.ecr.${data.aws_region.current.name}.amazonaws.com/sagemaker-scikit-learn:1.0-1"
+  sklearn_image_uri = "683313688378.dkr.ecr.${data.aws_region.current.name}.amazonaws.com/sagemaker-scikit-learn:1.0-1-cpu-py3"
 }
 
 resource "aws_sagemaker_pipeline" "mlops_pipeline" {
@@ -67,7 +88,7 @@ resource "aws_sagemaker_pipeline" "mlops_pipeline" {
       {
         Name         = "DataS3Uri",
         Type         = "String",
-        DefaultValue = "s3://${var.s3_data_bucket_name}/${var.s3_data_key}"
+        DefaultValue = "s3://${var.s3_data_bucket_name}"
       },
       {
         Name         = "RMSEThreshold",
@@ -341,8 +362,9 @@ resource "aws_sagemaker_pipeline" "mlops_pipeline" {
         DependsOn = ["RegisterModel"],
         Arguments = {
           PrimaryContainer = {
-            ModelPackageName = {
-              Get = "Steps.RegisterModel.ModelPackageName"
+            Image = "683313688378.dkr.ecr.us-west-2.amazonaws.com/sagemaker-xgboost:1.5-1",
+            ModelDataUrl = {
+              Get = "Steps.ModelTraining.ModelArtifacts.S3ModelArtifacts"
             }
           },
           ExecutionRoleArn = "${aws_iam_role.sagemaker_execution_role.arn}"
@@ -362,6 +384,10 @@ resource "aws_sagemaker_pipeline" "mlops_pipeline" {
               VariantName          = "AllTraffic",
               InitialInstanceCount = 1,
               InstanceType         = "ml.m5.large"
+              ManagedInstanceScaling = {
+                MinInstanceCount = 1,
+                MaxInstanceCount = 2
+              }
             }
           ]
         }
