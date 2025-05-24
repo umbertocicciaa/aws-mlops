@@ -215,8 +215,8 @@ resource "aws_sagemaker_pipeline" "mlops_pipeline" {
               ChannelName = "train",
               DataSource = {
                 S3DataSource = {
-                  S3DataType = "S3Prefix",
-                  S3Uri = "s3://${var.model_data_bucket}/output/preprocessing/train/train.csv",
+                  S3DataType             = "S3Prefix",
+                  S3Uri                  = "s3://${var.model_data_bucket}/output/preprocessing/train/train.csv",
                   S3DataDistributionType = "FullyReplicated"
                 }
               },
@@ -227,8 +227,8 @@ resource "aws_sagemaker_pipeline" "mlops_pipeline" {
               ChannelName = "validation",
               DataSource = {
                 S3DataSource = {
-                  S3DataType = "S3Prefix",
-                  S3Uri = "s3://${var.model_data_bucket}/output/preprocessing/validation/validation.csv",
+                  S3DataType             = "S3Prefix",
+                  S3Uri                  = "s3://${var.model_data_bucket}/output/preprocessing/validation/validation.csv",
                   S3DataDistributionType = "FullyReplicated"
                 }
               },
@@ -266,8 +266,8 @@ resource "aws_sagemaker_pipeline" "mlops_pipeline" {
         DependsOn = ["DataPreprocessing"]
       },
       {
-        Name = "RegisterModel",
-        Type = "RegisterModel",
+        Name      = "RegisterModel",
+        Type      = "RegisterModel",
         DependsOn = ["ModelTraining"],
         Arguments = {
           ModelPackageGroupName = "${aws_sagemaker_model_package_group.model_package_group.model_package_group_name}",
