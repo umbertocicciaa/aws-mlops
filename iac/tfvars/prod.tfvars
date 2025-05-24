@@ -33,11 +33,6 @@ s3_object_config = {
     key         = "training_preprocessing.py"
     file_source = "../pipeline/training_preprocessing.py"
   },
-  "evaluate_py" = {
-    create      = true
-    key         = "evaluate.py"
-    file_source = "../pipeline/evaluate.py"
-  }
 }
 
 s3_object_dataset_config = {

@@ -196,7 +196,7 @@ resource "aws_sagemaker_pipeline" "mlops_pipeline" {
               InstanceType = {
                 Get = "Parameters.ProcessingInstanceType"
               },
-              VolumeSizeInGB = 30
+              VolumeSizeInGB = 5
             }
           },
           RoleArn = "${aws_iam_role.sagemaker_execution_role.arn}"
@@ -216,9 +216,7 @@ resource "aws_sagemaker_pipeline" "mlops_pipeline" {
               DataSource = {
                 S3DataSource = {
                   S3DataType = "S3Prefix",
-                  S3Uri = {
-                    Get = "Steps.DataPreprocessing.ProcessingOutputConfig.Outputs[0].S3Output.S3Uri"
-                  },
+                  S3Uri = "s3://${var.model_data_bucket}/output/preprocessing/train/train.csv",
                   S3DataDistributionType = "FullyReplicated"
                 }
               },
@@ -230,9 +228,7 @@ resource "aws_sagemaker_pipeline" "mlops_pipeline" {
               DataSource = {
                 S3DataSource = {
                   S3DataType = "S3Prefix",
-                  S3Uri = {
-                    Get = "Steps.DataPreprocessing.ProcessingOutputConfig.Outputs[1].S3Output.S3Uri"
-                  },
+                  S3Uri = "s3://${var.model_data_bucket}/output/preprocessing/validation/validation.csv",
                   S3DataDistributionType = "FullyReplicated"
                 }
               },
@@ -248,7 +244,7 @@ resource "aws_sagemaker_pipeline" "mlops_pipeline" {
             InstanceType = {
               Get = "Parameters.TrainingInstanceType"
             },
-            VolumeSizeInGB = 30
+            VolumeSizeInGB = 5
           },
           StoppingCondition = {
             MaxRuntimeInSeconds = 86400
@@ -260,100 +256,19 @@ resource "aws_sagemaker_pipeline" "mlops_pipeline" {
             eta              = "0.2",
             gamma            = "4",
             min_child_weight = "6",
-            subsample        = "0.7"
+            subsample        = "0.7",
+            tree_method      = "hist",
+            eval_metric      = "rmse",
+            objective        = "reg:linear"
           },
           RoleArn = "${aws_iam_role.sagemaker_execution_role.arn}"
         },
         DependsOn = ["DataPreprocessing"]
       },
       {
-        Name = "ModelEvaluation",
-        Type = "Processing",
-        Arguments = {
-          AppSpecification = {
-            ImageUri            = "${local.sklearn_image_uri}",
-            ContainerEntrypoint = ["python3", "/opt/ml/processing/input/code/evaluate.py"]
-          },
-          ProcessingInputs = [
-            {
-              InputName  = "code",
-              AppManaged = false,
-              S3Input = {
-                S3Uri                  = "s3://${var.scripts_bucket}/evaluate.py",
-                LocalPath              = "/opt/ml/processing/input/code",
-                S3DataType             = "S3Prefix",
-                S3InputMode            = "File",
-                S3DataDistributionType = "FullyReplicated",
-                S3CompressionType      = "None"
-              }
-            },
-            {
-              InputName  = "test",
-              AppManaged = false,
-              S3Input = {
-                S3Uri = {
-                  Get = "Steps.DataPreprocessing.ProcessingOutputConfig.Outputs[2].S3Output.S3Uri"
-                },
-                LocalPath              = "/opt/ml/processing/input/test",
-                S3DataType             = "S3Prefix",
-                S3InputMode            = "File",
-                S3DataDistributionType = "FullyReplicated",
-                S3CompressionType      = "None"
-              }
-            },
-            {
-              InputName  = "model",
-              AppManaged = false,
-              S3Input = {
-                S3Uri = {
-                  Get = "Steps.ModelTraining.ModelArtifacts.S3ModelArtifacts"
-                },
-                LocalPath              = "/opt/ml/processing/input/model",
-                S3DataType             = "S3Prefix",
-                S3InputMode            = "File",
-                S3DataDistributionType = "FullyReplicated",
-                S3CompressionType      = "None"
-              }
-            }
-          ],
-          ProcessingOutputConfig = {
-            Outputs = [
-              {
-                OutputName = "metrics",
-                AppManaged = false,
-                S3Output = {
-                  S3Uri        = "s3://${var.model_data_bucket}/output/metrics",
-                  LocalPath    = "/opt/ml/processing/output/metrics",
-                  S3UploadMode = "EndOfJob"
-                }
-              },
-              {
-                OutputName = "evaluation",
-                AppManaged = false,
-                S3Output = {
-                  S3Uri        = "s3://${var.model_data_bucket}/output/evaluation",
-                  LocalPath    = "/opt/ml/processing/output/evaluation",
-                  S3UploadMode = "EndOfJob"
-                }
-              }
-            ]
-          },
-          ProcessingResources = {
-            ClusterConfig = {
-              InstanceCount = 1,
-              InstanceType = {
-                Get = "Parameters.ProcessingInstanceType"
-              },
-              VolumeSizeInGB = 30
-            }
-          },
-          RoleArn = "${aws_iam_role.sagemaker_execution_role.arn}"
-        },
-        DependsOn = ["ModelTraining"]
-      },
-      {
         Name = "RegisterModel",
         Type = "RegisterModel",
+        DependsOn = ["ModelTraining"],
         Arguments = {
           ModelPackageGroupName = "${aws_sagemaker_model_package_group.model_package_group.model_package_group_name}",
           ModelApprovalStatus = {
@@ -367,20 +282,9 @@ resource "aws_sagemaker_pipeline" "mlops_pipeline" {
             ],
             SupportedContentTypes      = ["text/csv"],
             SupportedResponseMIMETypes = ["text/csv"]
-          },
-          ModelMetrics = {
-            ModelQuality = {
-              Statistics = {
-                ContentType = "application/json",
-                S3Uri = {
-                  Get = "Steps.ModelEvaluation.ProcessingOutputConfig.Outputs[1].S3Output.S3Uri"
-                }
-              }
-            }
-          },
+          }
           ModelPackageDescription = "California Housing regression model",
-        },
-        DependsOn = ["ModelEvaluation"]
+        }
       },
       {
         Name      = "CreateModelStep",
@@ -388,7 +292,7 @@ resource "aws_sagemaker_pipeline" "mlops_pipeline" {
         DependsOn = ["RegisterModel"],
         Arguments = {
           PrimaryContainer = {
-            Image = "683313688378.dkr.ecr.us-west-2.amazonaws.com/sagemaker-xgboost:1.5-1",
+            Image = local.xgboost_image_uri,
             ModelDataUrl = {
               Get = "Steps.ModelTraining.ModelArtifacts.S3ModelArtifacts"
             }
@@ -409,7 +313,7 @@ resource "aws_sagemaker_pipeline" "mlops_pipeline" {
               },
               VariantName          = "AllTraffic",
               InitialInstanceCount = 1,
-              InstanceType         = "ml.m5.large"
+              InstanceType         = var.training_instance_type,
               ManagedInstanceScaling = {
                 MinInstanceCount = 1,
                 MaxInstanceCount = 2

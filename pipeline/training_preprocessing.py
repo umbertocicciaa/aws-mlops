@@ -5,6 +5,7 @@ import os
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler, LabelEncoder, OneHotEncoder
 from sklearn.compose import ColumnTransformer
+import joblib
 
 # Parse arguments
 parser = argparse.ArgumentParser()
@@ -150,35 +151,48 @@ y_train_reset = y_train.reset_index(drop=True)
 y_val_reset = y_val.reset_index(drop=True)
 y_test_reset = y_test.reset_index(drop=True)
 
-# Add target column back
-train_df = X_train_processed_df.copy()
+# Create datasets with target column as the first column
+train_df = pd.DataFrame()
 train_df[target_column] = y_train_reset.values
+train_df = pd.concat([train_df, X_train_processed_df], axis=1)
 
-val_df = X_val_processed_df.copy()
+val_df = pd.DataFrame()
 val_df[target_column] = y_val_reset.values
+val_df = pd.concat([val_df, X_val_processed_df], axis=1)
 
-test_df = X_test_processed_df.copy()
+test_df = pd.DataFrame()
 test_df[target_column] = y_test_reset.values
+test_df = pd.concat([test_df, X_test_processed_df], axis=1)
+
+print("Target column is now in position 0 (first column) as required by XGBoost")
+print(f"Train columns order: {train_df.columns.tolist()[:5]}...")  # Show first 5 columns
 
 # Save processed datasets (without headers for XGBoost compatibility)
 train_output_file = os.path.join(output_train_path, 'train.csv')
 val_output_file = os.path.join(output_validation_path, 'validation.csv')
 test_output_file = os.path.join(output_test_path, 'test.csv')
 
-train_df.to_csv(train_output_file, header=False, index=False)
-val_df.to_csv(val_output_file, header=False, index=False)
-test_df.to_csv(test_output_file, header=False, index=False)
+# Save without headers and index as required by XGBoost
+train_df.to_csv(train_output_file, header=False, index=False, sep=',',encoding='utf-8',)
+val_df.to_csv(val_output_file, header=False, index=False, sep=',',encoding='utf-8',)
+test_df.to_csv(test_output_file, header=False, index=False, sep=',',encoding='utf-8',)
 
 print(f"Saved train data to: {train_output_file}")
 print(f"Saved validation data to: {val_output_file}")
 print(f"Saved test data to: {test_output_file}")
 
-# Save feature names for reference
+# Save feature names for reference (excluding target column)
 feature_names_file = os.path.join(output_train_path, 'feature_names.txt')
 with open(feature_names_file, 'w') as f:
-    for name in all_feature_names:
-        f.write(f"{name}\n")
+    f.write(f"Column 0: {target_column} (TARGET)\n")
+    for i, name in enumerate(all_feature_names, 1):
+        f.write(f"Column {i}: {name}\n")
 print(f"Saved feature names to: {feature_names_file}")
+
+# Save preprocessing pipeline for later use in evaluation
+preprocessor_file = os.path.join(output_train_path, 'preprocessor.joblib')
+joblib.dump(preprocessor, preprocessor_file)
+print(f"Saved preprocessor to: {preprocessor_file}")
 
 print("Preprocessing completed successfully")
 print(f"Final train shape: {train_df.shape}")
@@ -186,5 +200,10 @@ print(f"Final validation shape: {val_df.shape}")
 print(f"Final test shape: {test_df.shape}")
 
 # Display sample of processed data
-print(f"\nSample of processed train data:")
-print(train_df.head())
+print(f"\nSample of processed train data (first 3 rows, first 5 columns):")
+print(train_df.iloc[:3, :5])
+
+# Verify target column is first
+print(f"\nTarget column verification:")
+print(f"First column name: {train_df.columns[0]}")
+print(f"First column values (first 5): {train_df.iloc[:5, 0].tolist()}")
