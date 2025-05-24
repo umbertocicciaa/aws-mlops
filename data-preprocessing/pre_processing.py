@@ -24,19 +24,7 @@ housing_df = housing_dyf.toDF()
 housing_df = housing_df.dropna()
 
 # Turn it back to a dynamic frame
-housing_tmp = DynamicFrame.fromDF(housing_df, glueContext, "nested")
-
-# Rename, cast, and nest with apply_mapping
-medicare_nest = housing_tmp.apply_mapping([('longitude', 'double', 'location.longitude', 'double'),
-                                            ('latitude', 'double', 'location.latitude', 'double'),
-                                            ('housing_median_age', 'double', 'housing.age', 'double'),
-                                            ('total_rooms', 'double', 'housing.total_rooms', 'double'),
-                                            ('total_bedrooms', 'double', 'housing.total_bedrooms', 'double'),
-                                            ('population', 'double', 'housing.population', 'double'),
-                                            ('households', 'double', 'housing.households', 'double'),
-                                            ('median_income', 'double', 'income.median', 'double'),
-                                            ('median_house_value', 'double', 'price.median', 'double'),
-                                            ('ocean_proximity', 'string', 'location.ocean_proximity', 'string')])
+housing = DynamicFrame.fromDF(housing_df, glueContext, "nested")
 
 # Write it out in Parquet
-glueContext.write_dynamic_frame.from_options(frame=medicare_nest, connection_type="s3", connection_options={"path": output_dir}, format="parquet")
+glueContext.write_dynamic_frame.from_options(frame=housing, connection_type="s3", connection_options={"path": output_dir}, format="parquet")
