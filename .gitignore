@@ -3,3 +3,4 @@ prod.env
 migrate-state.txt
 *.zip
 iac/plans/
+.venv/
