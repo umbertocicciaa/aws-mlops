@@ -14,6 +14,11 @@ s3_config = {
     create_bucket = true
     bucket        = "pre-processed-data-bucket"
     force_destroy = true
+  },
+  "model_data_bucket" = {
+    create_bucket = true
+    bucket        = "model-data-bucket"
+    force_destroy = true
   }
 }
 

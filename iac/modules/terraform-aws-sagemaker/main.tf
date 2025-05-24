@@ -99,12 +99,12 @@ resource "aws_sagemaker_pipeline" "mlops_pipeline" {
       {
         Name         = "ProcessingInstanceType",
         Type         = "String",
-        DefaultValue = "${var.instance_type}"
+        DefaultValue = "${var.preprocessing_instance_type}"
       },
       {
         Name         = "TrainingInstanceType",
         Type         = "String",
-        DefaultValue = "${var.instance_type}"
+        DefaultValue = "${var.training_instance_type}"
       },
       {
         Name         = "ModelApprovalStatus",
@@ -165,7 +165,7 @@ resource "aws_sagemaker_pipeline" "mlops_pipeline" {
                 OutputName = "train",
                 AppManaged = false,
                 S3Output = {
-                  S3Uri        = "s3://${var.s3_data_bucket_name}/output/preprocessing/train",
+                  S3Uri        = "s3://${var.model_data_bucket}/output/preprocessing/train",
                   LocalPath    = "/opt/ml/processing/output/train",
                   S3UploadMode = "EndOfJob"
                 }
@@ -174,7 +174,7 @@ resource "aws_sagemaker_pipeline" "mlops_pipeline" {
                 OutputName = "validation",
                 AppManaged = false,
                 S3Output = {
-                  S3Uri        = "s3://${var.s3_data_bucket_name}/output/preprocessing/validation",
+                  S3Uri        = "s3://${var.model_data_bucket}/output/preprocessing/validation",
                   LocalPath    = "/opt/ml/processing/output/validation",
                   S3UploadMode = "EndOfJob"
                 }
@@ -183,7 +183,7 @@ resource "aws_sagemaker_pipeline" "mlops_pipeline" {
                 OutputName = "test",
                 AppManaged = false,
                 S3Output = {
-                  S3Uri        = "s3://${var.s3_data_bucket_name}/output/preprocessing/test",
+                  S3Uri        = "s3://${var.model_data_bucket}/output/preprocessing/test",
                   LocalPath    = "/opt/ml/processing/output/test",
                   S3UploadMode = "EndOfJob"
                 }
@@ -241,7 +241,7 @@ resource "aws_sagemaker_pipeline" "mlops_pipeline" {
             }
           ],
           OutputDataConfig = {
-            S3OutputPath = "s3://${var.s3_data_bucket_name}/output/model"
+            S3OutputPath = "s3://${var.model_data_bucket}/output/model"
           },
           ResourceConfig = {
             InstanceCount = 1,
@@ -322,7 +322,7 @@ resource "aws_sagemaker_pipeline" "mlops_pipeline" {
                 OutputName = "metrics",
                 AppManaged = false,
                 S3Output = {
-                  S3Uri        = "s3://${var.s3_data_bucket_name}/output/metrics",
+                  S3Uri        = "s3://${var.model_data_bucket}/output/metrics",
                   LocalPath    = "/opt/ml/processing/output/metrics",
                   S3UploadMode = "EndOfJob"
                 }
@@ -331,7 +331,7 @@ resource "aws_sagemaker_pipeline" "mlops_pipeline" {
                 OutputName = "evaluation",
                 AppManaged = false,
                 S3Output = {
-                  S3Uri        = "s3://${var.s3_data_bucket_name}/output/evaluation",
+                  S3Uri        = "s3://${var.model_data_bucket}/output/evaluation",
                   LocalPath    = "/opt/ml/processing/output/evaluation",
                   S3UploadMode = "EndOfJob"
                 }

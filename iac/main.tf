@@ -306,6 +306,7 @@ module "sagemaker" {
 
   s3_data_bucket_name = module.s3["pre_processed_data_bucket"].s3_bucket_id
   scripts_bucket      = module.s3["scripts_source_bucket"].s3_bucket_id
+  model_data_bucket   = module.s3["model_data_bucket"].s3_bucket_id
 
   vpc_id             = var.sagemaker_config.vpc_id
   subnet_ids         = var.sagemaker_config.subnet_ids
