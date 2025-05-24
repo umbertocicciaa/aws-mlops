@@ -129,14 +129,14 @@ resource "aws_sagemaker_pipeline" "mlops_pipeline" {
         Arguments = {
           AppSpecification = {
             ImageUri            = "${local.sklearn_image_uri}",
-            ContainerEntrypoint = ["python3", "/opt/ml/processing/input/code/training.py"]
+            ContainerEntrypoint = ["python3", "/opt/ml/processing/input/code/training_preprocessing.py"]
           },
           ProcessingInputs = [
             {
               InputName  = "code",
               AppManaged = false,
               S3Input = {
-                S3Uri                  = "s3://${var.scripts_bucket}/training.py",
+                S3Uri                  = "s3://${var.scripts_bucket}/training_preprocessing.py",
                 LocalPath              = "/opt/ml/processing/input/code",
                 S3DataType             = "S3Prefix",
                 S3InputMode            = "File",
