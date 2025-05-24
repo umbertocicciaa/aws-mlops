@@ -119,6 +119,15 @@ variable "s3_object_dataset_config" {
   default = {}
 }
 
+variable "s3_notifications_config" {
+  description = "S3 bucket notifications configurations."
+  type = map(object({
+    bucket = string
+    eventbridge = bool
+  }))
+  default = {}
+}
+
 # Glue configurations
 variable "glue_catalog_database_config" {
   description = "Glue catalog database configurations."
@@ -322,7 +331,7 @@ variable "glue_job_config" {
     job_description           = optional(string)
     role_arn                  = optional(string)
     connections               = optional(list(string))
-    glue_version              = optional(string, "2.0")
+    glue_version              = optional(string, "4.0")
     default_arguments         = optional(map(string))
     non_overridable_arguments = optional(map(string))
     security_configuration    = optional(string)

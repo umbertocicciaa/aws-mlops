@@ -41,6 +41,17 @@ s3_object_dataset_config = {
   file_source = "../dataset/housing.csv"
 }
 
+s3_notifications_config ={
+  "pre_processed_data_bucket" = {
+    bucket = "pre_processed_data_bucket"
+    eventbridge = true
+  },
+  "data_source_bucket" = {
+    bucket = "data_source_bucket"
+    eventbridge = true
+  }
+}
+
 # glue
 glue_catalog_database_config = {
   catalog_database_name        = "housings"
@@ -55,7 +66,7 @@ glue_catalog_table_config = {
 glue_crawler_config = {
   crawler_name        = "prod-crawler-elt-preprocessing"
   crawler_description = "Crawler for ETL Preprocessing"
-  schedule            = "cron(0 1 * * ? *)"
+  #schedule            = "cron(0 1 * * ? *)"
   schema_change_policy = {
     delete_behavior = "LOG"
     update_behavior = null
@@ -71,7 +82,7 @@ glue_workflow_config = {
 glue_job_config = {
   job_name          = "prod-job-elt-preprocessing"
   job_description   = "Job for ETL Preprocessing"
-  glue_version      = "2.0"
+  glue_version      = "4.0"
   timeout           = 20
   max_retries       = 2
   worker_type       = "Standard"

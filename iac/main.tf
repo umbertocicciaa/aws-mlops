@@ -25,6 +25,14 @@ module "s3_object" {
   force_destroy = each.value.force_destroy
 }
 
+module "s3_notifications"{
+  source = "./modules/terraform-aws-s3-bucket/modules/notification"
+  for_each = var.s3_notifications_config
+
+  bucket = module.s3["${each.value.bucket}"].s3_bucket_id
+  eventbridge = each.value.eventbridge
+}
+
 module "s3_object_dataset" {
   source        = "./modules/terraform-aws-s3-bucket/modules/object"
   bucket        = module.s3["data_source_bucket"].s3_bucket_id
@@ -62,7 +70,7 @@ module "glue_crawler" {
   role                = module.glue_iam_role.arn
   crawler_name        = var.glue_crawler_config.crawler_name
   crawler_description = var.glue_crawler_config.crawler_description
-  schedule            = var.glue_crawler_config.schedule
+  #schedule            = var.glue_crawler_config.schedule
 
   s3_target = [
     {
@@ -318,9 +326,8 @@ module "sagemaker" {
 module "mlops_event_bridge" {
   source = "./modules/terraform-aws-eventbridge"
 
-  create      = true
-  create_role = true
-  create_bus  = false
+  create     = true
+  create_bus = false
 
   rules = {
     parquet_upload_rule = {
@@ -349,14 +356,15 @@ module "mlops_event_bridge" {
     }]
   }
 
+  create_role              = true
   role_name                = var.eventbridge_mlops_config.role_name
   attach_policy_statements = true
   policy_statements = {
-    sagemaker = {
+    sagemaker_full_access = {
       effect    = "Allow",
-      actions   = ["sagemaker:StartPipelineExecution"],
-      resources = ["${module.sagemaker.sagemaker_pipeline_arn}"],
-    },
+      actions   = ["sagemaker:*", "events:*", "schemas:*", "scheduler:*", "pipes:*"],
+      resources = ["*"],
+    }
   }
 }
 
