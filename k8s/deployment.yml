@@ -34,6 +34,11 @@ spec:
                 secretKeyRef:
                   name: aws-credentials
                   key: AWS_DEFAULT_REGION
+            - name: SAGEMAKER_ENDPOINT_NAME
+              valueFrom:
+                secretKeyRef:
+                  name: aws-credentials
+                  key: SAGEMAKER_ENDPOINT_NAME
           ports:
             - containerPort: 8501
           resources:
