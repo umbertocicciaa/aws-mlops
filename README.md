@@ -1,3 +1,5 @@
+[![Build and Deploy Frontend Docker Image](https://github.com/umbertocicciaa/aws-mlops/actions/workflows/frontend.yaml/badge.svg)](https://github.com/umbertocicciaa/aws-mlops/actions/workflows/frontend.yaml)
+
 # AWS MLOps with Glue and SageMaker
 
 ## Overview
