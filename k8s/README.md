@@ -6,6 +6,7 @@ This directory contains Kubernetes manifests and configuration files for deployi
 
 - `deployments.yml` – Deployment YAMLs for frontend service
 - `service.yml` – Service definitions for exposing workloads
+- `secrets.yml` – Secrets definitions for aws credential and env variables
 
 ## Usage
 
@@ -14,7 +15,7 @@ This directory contains Kubernetes manifests and configuration files for deployi
 
     ```sh
     chmod u+x start.sh
-    sudo ./start.sh
+    ./start.sh
     ```
 
 ## Prerequisites
