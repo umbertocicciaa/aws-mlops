@@ -1,6 +1,0 @@
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: endpoint-config
-data:
-  SAGEMAKER_ENDPOINT_URL: ""
