@@ -18,6 +18,9 @@ spec:
         - name: streamlit
           image: ghcr.io/umbertocicciaa/mlops-frontend:latest
           imagePullPolicy: Always
+          envFrom:
+            - configMapRef:
+                name: endpoint-config
           ports:
             - containerPort: 8501
           resources:
