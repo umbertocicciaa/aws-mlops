@@ -1,12 +1,13 @@
 import streamlit as st
-import pandas as pd
-import requests
 import json
 import os
 import matplotlib.pyplot as plt
+from botocore.exceptions import BotoCoreError
+import boto3
 
 # Constants
-ENDPOINT_URL = os.environ.get("SAGEMAKER_ENDPOINT_URL")
+REGION_NAME = os.environ.get("AWS_DEFAULT_REGION")
+ENDPOINT_NAME = os.environ.get("SAGEMAKER_ENDPOINT_NAME")
 
 # Streamlit app title
 st.title("California Housing Price Prediction")
@@ -38,19 +39,42 @@ input_data = {
     ]
 }
 
+# Prepare input data for prediction as CSV
+csv_input = f"{med_inc},{house_age},{avg_rooms},{avg_bedrooms},{population},{avg_occupancy},{latitude},{longitude}"
+
 # Make prediction
 if st.button("Predict"):
-    response = requests.post(ENDPOINT_URL, data=json.dumps(input_data), headers={"Content-Type": "application/json"})
-    prediction = response.json()
-    
+    with st.spinner("Predicting..."):
+        try:
+            runtime = boto3.client("sagemaker-runtime", region_name=REGION_NAME)
+            response = runtime.invoke_endpoint(
+                EndpointName=ENDPOINT_NAME,
+                ContentType="text/csv",
+                Body=csv_input
+            )
+            prediction_raw = response["Body"].read().decode("utf-8")
+            try:
+                prediction = json.loads(prediction_raw)
+                if isinstance(prediction, dict) and "predictions" in prediction:
+                    predicted_price = prediction["predictions"][0]
+                elif isinstance(prediction, list):
+                    predicted_price = prediction[0]
+                else:
+                    predicted_price = prediction
+            except Exception:
+                predicted_price = float(prediction_raw)
+        except BotoCoreError as e:
+            st.error(f"Error: {e}")
+            predicted_price = 0
+
     # Display prediction result
     st.subheader("Prediction Result")
-    st.write(f"Predicted House Price: ${prediction['predictions'][0]:,.2f}")
+    st.write(f"Predicted House Price: ${predicted_price:,.2f}")
 
     # Visualization
     st.subheader("Visualization")
     plt.figure(figsize=(10, 5))
-    plt.bar(["Predicted Price"], [prediction['predictions'][0]], color='blue')
+    plt.bar(["Predicted Price"], [predicted_price], color='blue')
     plt.ylabel("Price in $")
     plt.title("Predicted House Price")
     st.pyplot(plt)
