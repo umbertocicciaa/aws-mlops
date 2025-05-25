@@ -8,6 +8,8 @@
 
 This project implements an end-to-end MLOps pipeline on AWS for the California Housing dataset, focusing on linear regression prediction. The architecture leverages AWS Glue for ETL preprocessing, Lambda and EventBridge for orchestration, SageMaker for model training and deployment, and a Streamlit frontend for user interaction.
 
+![Demo](resources/demo.jpeg)
+
 ---
 
 ## Architecture
