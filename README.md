@@ -1,5 +1,7 @@
 [![Build and Deploy Frontend Docker Image](https://github.com/umbertocicciaa/aws-mlops/actions/workflows/frontend.yaml/badge.svg)](https://github.com/umbertocicciaa/aws-mlops/actions/workflows/frontend.yaml)
 
+[![Deploy Infrastructure with Terraform](https://github.com/umbertocicciaa/aws-mlops/actions/workflows/iac.yaml/badge.svg)](https://github.com/umbertocicciaa/aws-mlops/actions/workflows/iac.yaml)
+
 # AWS MLOps with Glue and SageMaker
 
 ## Overview
