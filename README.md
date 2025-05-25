@@ -60,6 +60,6 @@ This project implements an end-to-end MLOps pipeline on AWS for the California H
 
 - [AWS Glue Documentation](https://docs.aws.amazon.com/glue/)
 - [AWS SageMaker Documentation](https://docs.aws.amazon.com/sagemaker/)
-- [Terraform AWS Provider](https://registry.terraform.io/providers/hashicorp/aws/latest/docs)
+- [Relazione](docs/umbertodomenico_ciccia_relazione_progetto.pdf)
 
 ---
