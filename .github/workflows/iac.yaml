@@ -1,5 +1,8 @@
 name: Deploy Infrastructure with Terraform
 
+permissions:
+    contents: read
+
 on:
     workflow_dispatch:
 
