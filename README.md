@@ -12,6 +12,33 @@ This project implements an end-to-end MLOps pipeline on AWS for the California H
 
 ---
 
+## Project Structure
+
+Project structure:
+
+- **[data-preprocessing/](data-preprocessing/)**  
+   Contains AWS Glue ETL scripts for data preprocessing.
+  - **[pre_processing.py](data-preprocessing/pre_processing.py)**: Main ETL preprocessing script for the California Housing dataset.
+
+- **[frontend/](frontend/)**  
+   Streamlit-based frontend application for user interaction.
+  - **[app.py](frontend/src/app.py)**: Main Streamlit app file.
+  - **[requirements.txt](frontend/src/requirements.txt)**: Python dependencies for the frontend.
+
+- **[iac/](iac/)**  
+   Infrastructure as Code (IaC) using Terraform to provision AWS resources.
+
+- **[pipeline/](pipeline/)**  
+   Source code for the SageMaker MLOps pipeline.
+  - **[training_preprocessing.py](pipeline/training_preprocessing.py)**: Data preprocessing script used during model training.
+
+- **[resources/](resources/)**  
+   Images and other resources for documentation.
+
+- **[docs/](docs/)**  
+   Project documentation and reports.
+  - **[umbertodomenico_ciccia_relazione_progetto.pdf](docs/umbertodomenico_ciccia_relazione_progetto.pdf)**: Project report (in Italian).
+
 ## Architecture
 
 1. **ETL Pipeline with AWS Glue**
