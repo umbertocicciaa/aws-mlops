@@ -5,11 +5,10 @@ This project is a Streamlit application designed to make predictions using a Sag
 ## Project Structure
 
 ```
-sagemaker-streamlit-app
+frontend
 ├── src
-│   ├── app.py          # Main entry point for the Streamlit application
-│   └── utils.py        # Utility functions for data preprocessing and visualization
-├── requirements.txt     # List of dependencies required for the project
+│   └── app.py          # Main entry point for the Streamlit application
+│   └── requirements.txt     # List of dependencies required for the project
 └── README.md            # Documentation for the project
 ```
 
@@ -17,8 +16,8 @@ sagemaker-streamlit-app
 
 1. Clone the repository:
    ```
-   git clone https://github.com/yourusername/sagemaker-streamlit-app.git
-   cd sagemaker-streamlit-app
+   git clone https://github.com/umbertocicciaa/aws-mlops.git
+   cd frontend
    ```
 
 2. Create a virtual environment (optional but recommended):
