@@ -2,11 +2,16 @@
 
 This directory contains Kubernetes manifests and configuration files for deploying application frontend on localhost.
 
+## Prerequisites
+
+- Minikube cluster
+- `kubectl` configured for your cluster
+
 ## Structure
 
-- `deployments.yml` – Deployment YAMLs for frontend service
-- `service.yml` – Service definitions for exposing workloads
-- `secrets.yml` – Secrets definitions for aws credential and env variables
+- `deployment.yml` – Deployment YAMLs for frontend service
+- `service.yaml` – Service definitions for exposing workloads
+- `secrets.yaml` – Secrets definitions for aws credential and env variables
 
 ## Usage
 
@@ -17,8 +22,4 @@ This directory contains Kubernetes manifests and configuration files for deployi
     chmod u+x start.sh
     ./start.sh
     ```
-
-## Prerequisites
-
-- Minikube cluster
-- `kubectl` configured for your cluster
+    
