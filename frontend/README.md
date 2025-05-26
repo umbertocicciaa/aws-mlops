@@ -1,4 +1,4 @@
-# sagemaker-streamlit-app
+# Frontend
 
 This project is a Streamlit application designed to make predictions using a SageMaker endpoint for a linear regression model trained on the California housing dataset using XGBoost.
 
