@@ -24,5 +24,3 @@ echo "Deployment complete."
 
 # Open minikube tunnel for service access
 echo "Opening minikube tunnel for service access..."
-minikube tunnel &
-echo "Minikube tunnel started in the background."
