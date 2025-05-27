@@ -70,7 +70,7 @@ module "glue_crawler" {
   role                = module.glue_iam_role.arn
   crawler_name        = var.glue_crawler_config.crawler_name
   crawler_description = var.glue_crawler_config.crawler_description
-  #schedule            = var.glue_crawler_config.schedule
+
 
   s3_target = [
     {
@@ -78,10 +78,7 @@ module "glue_crawler" {
     }
   ]
 
-  schema_change_policy = {
-    delete_behavior = "LOG"
-    update_behavior = null
-  }
+  schema_change_policy = var.glue_crawler_config.schema_change_policy
 }
 
 module "glue_catalog_database" {
@@ -148,7 +145,15 @@ module "aws_glue_job" {
   )
 }
 
-# Glue policy
+module "glue_workflow" {
+  source = "./modules/terraform-aws-glue/modules/glue-workflow"
+
+  name                 = "glue-workflow-elt-preprocessing"
+  workflow_name        = var.glue_workflow_config.workflow_name
+  workflow_description = var.glue_workflow_config.workflow_description
+  max_concurrent_runs  = var.glue_workflow_config.max_concurrent_runs
+}
+
 data "aws_iam_policy_document" "glue_policy_crud" {
   statement {
     sid    = "BaseAccess"
@@ -253,16 +258,6 @@ module "glue_event_bridge" {
       resources = ["${module.glue_job_trigger.arn}"],
     },
   }
-}
-
-# Glue workflow
-module "glue_workflow" {
-  source = "./modules/terraform-aws-glue/modules/glue-workflow"
-
-  name                 = "glue-workflow-elt-preprocessing"
-  workflow_name        = var.glue_workflow_config.workflow_name
-  workflow_description = var.glue_workflow_config.workflow_description
-  max_concurrent_runs  = var.glue_workflow_config.max_concurrent_runs
 }
 
 # lambda

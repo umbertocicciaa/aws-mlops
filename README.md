@@ -42,9 +42,9 @@ Project structure:
 ## Architecture
 
 1. **ETL Pipeline with AWS Glue**
-   - Raw data is uploaded to an S3 data bucket.
-   - An [EventBridge](iac/modules/terraform-aws-eventbridge/README.md) rule detects new uploads and triggers a [Lambda function](iac/modules/terraform-aws-lambda/README.md).
-   - The Lambda function starts an [AWS Glue](iac/modules/terraform-aws-glue/README.md) workflow to preprocess the California Housing dataset (see [pre_processing.py](data-preprocessing/pre_processing.py)).
+   - Raw data is uploaded to an S3 buckets.
+   - When new data is uploaded to the S3 bucket, an EventBridge rule triggers a Lambda function. The Lambda function starts the Glue Crawler to update the data catalog.  - An [AWS Glue Crawler](iac/modules/terraform-aws-glue/README.md) detects new uploads in the S3 data bucket and updates the data catalog.
+   - After the crawler completes successfully, an ETL job is started to preprocess the California Housing dataset (see [pre_processing.py](data-preprocessing/pre_processing.py)).
    - Cleaned data is written to a final preprocessed S3 bucket.
 
 2. **Triggering SageMaker MLOps Pipeline**
