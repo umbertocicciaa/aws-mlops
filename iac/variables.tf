@@ -122,7 +122,7 @@ variable "s3_object_dataset_config" {
 variable "s3_notifications_config" {
   description = "S3 bucket notifications configurations."
   type = map(object({
-    bucket = string
+    bucket      = string
     eventbridge = bool
   }))
   default = {}

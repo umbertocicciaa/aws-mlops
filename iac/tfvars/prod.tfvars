@@ -41,13 +41,13 @@ s3_object_dataset_config = {
   file_source = "../dataset/housing.csv"
 }
 
-s3_notifications_config ={
+s3_notifications_config = {
   "pre_processed_data_bucket" = {
-    bucket = "pre_processed_data_bucket"
+    bucket      = "pre_processed_data_bucket"
     eventbridge = true
   },
   "data_source_bucket" = {
-    bucket = "data_source_bucket"
+    bucket      = "data_source_bucket"
     eventbridge = true
   }
 }

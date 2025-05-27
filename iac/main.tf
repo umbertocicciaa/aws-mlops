@@ -25,11 +25,11 @@ module "s3_object" {
   force_destroy = each.value.force_destroy
 }
 
-module "s3_notifications"{
-  source = "./modules/terraform-aws-s3-bucket/modules/notification"
+module "s3_notifications" {
+  source   = "./modules/terraform-aws-s3-bucket/modules/notification"
   for_each = var.s3_notifications_config
 
-  bucket = module.s3["${each.value.bucket}"].s3_bucket_id
+  bucket      = module.s3["${each.value.bucket}"].s3_bucket_id
   eventbridge = each.value.eventbridge
 }
 
@@ -224,6 +224,11 @@ module "glue_event_bridge" {
         "detail" : {
           "bucket" : {
             "name" : ["${module.s3["data_source_bucket"].s3_bucket_id}"]
+          },
+          "object" : {
+            "key" : [{
+              "prefix" : "input/"
+            }]
           }
         }
       })
