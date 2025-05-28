@@ -317,7 +317,7 @@ resource "aws_sagemaker_pipeline" "mlops_pipeline" {
                 Get = "Steps.CreateModelStep.ModelName"
               },
               InitialInstanceCount = 1,
-              InstanceType         = var.training_instance_type,
+              InstanceType         = var.deploy_instance_type,
               ManagedInstanceScaling = {
                 MinInstanceCount = 1,
                 MaxInstanceCount = 2

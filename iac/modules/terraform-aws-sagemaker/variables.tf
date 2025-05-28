@@ -31,6 +31,12 @@ variable "training_instance_type" {
   default     = "ml.m5.xlarge"
 }
 
+variable "deploy_instance_type" {
+  description = "EC2 instance type for deployment"
+  type        = string
+  default     = "ml.t2.medium"
+}
+
 variable "model_approval_status" {
   description = "Model approval status"
   type        = string
