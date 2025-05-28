@@ -66,7 +66,7 @@ glue_catalog_table_config = {
 glue_crawler_config = {
   crawler_name        = "prod-crawler-elt-preprocessing"
   crawler_description = "Crawler for ETL Preprocessing"
-  
+
   schema_change_policy = {
     delete_behavior = "LOG"
     update_behavior = "UPDATE_IN_DATABASE"

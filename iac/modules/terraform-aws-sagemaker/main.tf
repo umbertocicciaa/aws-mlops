@@ -278,6 +278,9 @@ resource "aws_sagemaker_pipeline" "mlops_pipeline" {
             Containers = [
               {
                 Image = local.xgboost_image_uri
+                ModelDataUrl = {
+                  Get = "Steps.ModelTraining.ModelArtifacts.S3ModelArtifacts"
+                }
               }
             ],
             SupportedContentTypes      = ["text/csv"],
@@ -291,13 +294,14 @@ resource "aws_sagemaker_pipeline" "mlops_pipeline" {
         Type      = "Model",
         DependsOn = ["RegisterModel"],
         Arguments = {
+          ModelName = "california-housing-model",
           PrimaryContainer = {
             Image = local.xgboost_image_uri,
             ModelDataUrl = {
               Get = "Steps.ModelTraining.ModelArtifacts.S3ModelArtifacts"
             }
           },
-          ExecutionRoleArn = "${aws_iam_role.sagemaker_execution_role.arn}"
+          ExecutionRoleArn = aws_iam_role.sagemaker_execution_role.arn
         }
       },
       {
@@ -308,10 +312,10 @@ resource "aws_sagemaker_pipeline" "mlops_pipeline" {
           EndpointConfigName = "california-housing-endpoint-config",
           ProductionVariants = [
             {
+              VariantName = "AllTraffic",
               ModelName = {
                 Get = "Steps.CreateModelStep.ModelName"
               },
-              VariantName          = "AllTraffic",
               InitialInstanceCount = 1,
               InstanceType         = var.training_instance_type,
               ManagedInstanceScaling = {
