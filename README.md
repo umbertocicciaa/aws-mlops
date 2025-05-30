@@ -40,7 +40,8 @@ Project structure:
 
 - **[docs/](docs/)**  
    Project documentation and reports.
-  - **[umbertodomenico_ciccia_relazione_progetto.pdf](docs/umbertodomenico_ciccia_relazione_progetto.pdf)**: Project report (in Italian).
+  - **[umbertodomenico_ciccia_summary.pdf](docs/umbertodomenico_ciccia_summary.pdf)**: Project report (in Italian).
+  - **[ciccia-assignement.pdf](docs/ciccia-assignement.pdf)**: Project assignement (in Italian).
 
 ## Architecture
 
