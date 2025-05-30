@@ -5,14 +5,11 @@ import matplotlib.pyplot as plt
 from botocore.exceptions import BotoCoreError
 import boto3
 
-# Constants
 REGION_NAME = os.environ.get("AWS_DEFAULT_REGION")
 ENDPOINT_NAME = os.environ.get("SAGEMAKER_ENDPOINT_NAME")
 
-# Streamlit app title
 st.title("California Housing Price Prediction")
 
-# User input for features
 st.header("Input Features")
 med_inc = st.number_input("Median Income", min_value=0.0, max_value=10.0, value=3.0)
 house_age = st.number_input("House Age", min_value=0, max_value=100, value=20)
@@ -23,7 +20,6 @@ avg_occupancy = st.number_input("Average Occupancy", min_value=0.0, max_value=10
 latitude = st.number_input("Latitude", min_value=-90.0, max_value=90.0, value=37.0)
 longitude = st.number_input("Longitude", min_value=-180.0, max_value=180.0, value=-119.0)
 
-# Prepare input data for prediction
 input_data = {
     "instances": [
         {
@@ -67,6 +63,5 @@ if st.button("Predict"):
             st.error(f"Error: {e}")
             predicted_price = 0
 
-    # Display prediction result
     st.subheader("Prediction Result")
     st.write(f"Predicted House Price: ${predicted_price:,.2f}")
