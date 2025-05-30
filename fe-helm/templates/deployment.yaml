@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "frontend-helm-chart.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: {{ include "frontend-helm-chart.name" . }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ include "frontend-helm-chart.name" . }}
+  template:
+    metadata:
+      labels:
+        app: {{ include "frontend-helm-chart.name" . }}
+    spec:
+      containers:
+        - name: {{ include "frontend-helm-chart.name" . }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          ports:
+            - containerPort: {{ .Values.service.port }}
+          env:
+            - name: AWS_ACCESS_KEY_ID
+              valueFrom:
+                secretKeyRef:
+                  name: aws-credentials
+                  key: AWS_ACCESS_KEY_ID
+            - name: AWS_SECRET_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: aws-credentials
+                  key: AWS_SECRET_ACCESS_KEY
+            - name: AWS_DEFAULT_REGION
+              valueFrom:
+                secretKeyRef:
+                  name: aws-credentials
+                  key: AWS_DEFAULT_REGION
+            - name: SAGEMAKER_ENDPOINT_NAME
+              valueFrom:
+                secretKeyRef:
+                  name: aws-credentials
+                  key: SAGEMAKER_ENDPOINT_NAME
+      imagePullSecrets:
+        - name: {{ .Values.imagePullSecret }}

@@ -1,0 +1,2 @@
+# in local environment, you can run the following command to expose the service:
+minikube tunnel

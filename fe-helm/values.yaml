@@ -1,0 +1,31 @@
+apiVersion: v1
+appVersion: "1.0"
+description: A Helm chart for deploying the frontend application
+name: frontend-chart
+version: 0.1.0
+
+replicaCount: 1
+
+image:
+  repository: ghcr.io/umbertocicciaa/mlops-frontend
+  pullPolicy: IfNotPresent
+  tag: "latest"
+
+service:
+  type: LoadBalancer
+  port: 80
+  targetPort: 8501
+
+resources: {}
+  
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
+secrets:
+  awsAccessKeyId: ""
+  awsSecretAccessKey: ""
+  awsDefaultRegion: ""
+  sagemakerEndpointName: ""

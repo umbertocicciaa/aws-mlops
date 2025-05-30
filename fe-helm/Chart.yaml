@@ -1,0 +1,16 @@
+name: frontend-helm-chart
+version: 0.1.0
+description: A Helm chart for deploying the frontend application on Kubernetes
+type: application
+maintainers:
+  - name: Your Name
+    email: your.email@example.com
+keywords:
+  - frontend
+  - kubernetes
+  - helm
+  - aws
+home: https://github.com/umbertocicciaa/aws-mlops
+sources:
+  - https://github.com/umbertocicciaa/aws-mlops/fe-helm
+dependencies: []
