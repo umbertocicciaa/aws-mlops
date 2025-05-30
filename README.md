@@ -25,6 +25,9 @@ Project structure:
   - **[app.py](frontend/src/app.py)**: Main Streamlit app file.
   - **[requirements.txt](frontend/src/requirements.txt)**: Python dependencies for the frontend.
 
+- **[fe-helm/](fe-helm/)**  
+   Contains Helm charts for deploying frontend and related services on Kubernetes.
+
 - **[iac/](iac/)**  
    Infrastructure as Code (IaC) using Terraform to provision AWS resources.
 
