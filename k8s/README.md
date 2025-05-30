@@ -22,4 +22,3 @@ This directory contains Kubernetes manifests and configuration files for deployi
     chmod u+x start.sh
     ./start.sh
     ```
-    

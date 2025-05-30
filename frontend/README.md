@@ -4,7 +4,7 @@ This project is a Streamlit application designed to make predictions using a Sag
 
 ## Project Structure
 
-```
+```txt
 frontend
 ├── src
 │   └── app.py          # Main entry point for the Streamlit application
@@ -15,26 +15,30 @@ frontend
 ## Setup Instructions
 
 1. Clone the repository:
-   ```
+
+   ```sh
    git clone https://github.com/umbertocicciaa/aws-mlops.git
    cd frontend
    ```
 
 2. Create a virtual environment (optional but recommended):
-   ```
+
+   ```sh
    python -m venv venv
    source venv/bin/activate  # On Windows use `venv\Scripts\activate`
    ```
 
 3. Install the required dependencies:
-   ```
+
+   ```sh
    pip install -r requirements.txt
    ```
 
 ## Usage Guidelines
 
 1. Start the Streamlit application:
-   ```
+
+   ```sh
    streamlit run src/app.py
    ```
 
