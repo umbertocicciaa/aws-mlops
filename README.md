@@ -91,6 +91,6 @@ Project structure:
 
 - [AWS Glue Documentation](https://docs.aws.amazon.com/glue/)
 - [AWS SageMaker Documentation](https://docs.aws.amazon.com/sagemaker/)
-- [Relazione](docs/umbertodomenico_ciccia_relazione_progetto.pdf)
+- [Relazione](docs/umbertodomenico_ciccia_summary.pdf)
 
 ---
