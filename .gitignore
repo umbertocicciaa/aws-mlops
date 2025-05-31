@@ -1,6 +1,3 @@
-dev.env
-prod.env
-migrate-state.txt
+*.env
 *.zip
-iac/plans/
 .venv/
