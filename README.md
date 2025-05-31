@@ -1,8 +1,12 @@
+# AWS MLOps with Glue and SageMaker
+
 [![Build and Deploy Frontend Docker Image](https://github.com/umbertocicciaa/aws-mlops/actions/workflows/frontend.yaml/badge.svg)](https://github.com/umbertocicciaa/aws-mlops/actions/workflows/frontend.yaml)
+
+[![CodeQL](https://github.com/umbertocicciaa/aws-mlops/actions/workflows/github-code-scanning/codeql/badge.svg)](https://github.com/umbertocicciaa/aws-mlops/actions/workflows/github-code-scanning/codeql)
 
 [![Deploy Infrastructure with Terraform](https://github.com/umbertocicciaa/aws-mlops/actions/workflows/iac.yaml/badge.svg)](https://github.com/umbertocicciaa/aws-mlops/actions/workflows/iac.yaml)
 
-# AWS MLOps with Glue and SageMaker
+[![Dependabot Updates](https://github.com/umbertocicciaa/aws-mlops/actions/workflows/dependabot/dependabot-updates/badge.svg)](https://github.com/umbertocicciaa/aws-mlops/actions/workflows/dependabot/dependabot-updates)
 
 ## Overview
 
