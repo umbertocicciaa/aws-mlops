@@ -41,5 +41,3 @@ spec:
                 secretKeyRef:
                   name: aws-credentials
                   key: SAGEMAKER_ENDPOINT_NAME
-      imagePullSecrets:
-        - name: {{ .Values.imagePullSecret }}

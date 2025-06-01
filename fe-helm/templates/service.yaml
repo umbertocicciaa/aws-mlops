@@ -8,9 +8,9 @@ metadata:
 spec:
   type: {{ .Values.service.type }}
   ports:
-    - port: {{ .Values.service.port }}
+    - name: "stremlit-port"
+      port: {{ .Values.service.port }}
       targetPort: {{ .Values.service.targetPort }}
       protocol: TCP
   selector:
     app: {{ include "frontend-helm-chart.name" . }}
-    release: {{ .Release.Name }}

@@ -16,14 +16,6 @@ service:
   port: 80
   targetPort: 8501
 
-resources: {}
-  
-nodeSelector: {}
-
-tolerations: []
-
-affinity: {}
-
 secrets:
   awsAccessKeyId: ""
   awsSecretAccessKey: ""
