@@ -23,27 +23,24 @@ os.makedirs(output_test_path, exist_ok=True)
 print(f"Looking for data files in: {input_data_path}")
 print(f"Directory contents: {os.listdir(input_data_path) if os.path.exists(input_data_path) else 'Directory does not exist'}")
 
-data_file = None
 supported_extensions = ['.parquet', '.csv']
+dataframes = []
 
 for file in os.listdir(input_data_path):
-    for ext in supported_extensions:
-        if file.endswith(ext):
-            data_file = os.path.join(input_data_path, file)
-            file_extension = ext
-            break
-    if data_file:
-        break
+    file_path = os.path.join(input_data_path, file)
+    if file.endswith('.parquet'):
+        print(f"Reading parquet file: {file_path}")
+        df_part = pd.read_parquet(file_path)
+        dataframes.append(df_part)
+    elif file.endswith('.csv'):
+        print(f"Reading CSV file: {file_path}")
+        df_part = pd.read_csv(file_path)
+        dataframes.append(df_part)
 
-if data_file is None:
+if not dataframes:
     raise ValueError(f"No supported data files ({', '.join(supported_extensions)}) found in the input directory")
 
-print(f"Reading file: {data_file}")
-
-if file_extension == '.parquet':
-    df = pd.read_parquet(data_file)
-elif file_extension == '.csv':
-    df = pd.read_csv(data_file)
+df = pd.concat(dataframes, ignore_index=True)
 
 print(f"Data shape: {df.shape}")
 print(f"Columns: {df.columns.tolist()}")

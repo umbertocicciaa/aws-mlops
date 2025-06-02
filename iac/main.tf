@@ -136,7 +136,6 @@ module "aws_glue_job" {
   worker_type       = var.glue_job_config.worker_type
   number_of_workers = var.glue_job_config.number_of_workers
 
-  # Pass environment variables to the Glue job script
   default_arguments = merge(
     {
       "--OUTPUT_DIR" = module.s3["pre_processed_data_bucket"].s3_bucket_id
