@@ -4,7 +4,7 @@ This directory contains AWS Lambda functions used in the MLOps pipeline.
 
 ## Structure
 
-- Each subfolder contains a Lambda function with its code and dependencies.
+- Each subfolder will contains a Lambda function with its code and dependencies.
 - Common utilities can be placed in a `utils` folder.
 
 ## Usage
@@ -15,4 +15,3 @@ This directory contains AWS Lambda functions used in the MLOps pipeline.
 ## References
 
 - [AWS Lambda Documentation](https://docs.aws.amazon.com/lambda/latest/dg/welcome.html)
-- [Serverless Framework](https://www.serverless.com/)
