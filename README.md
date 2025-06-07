@@ -16,6 +16,74 @@ This project implements an end-to-end MLOps pipeline on AWS for the California H
 
 ---
 
+## Getting Started
+
+1. **Infrastructure Deployment**
+   - All AWS resources are provisioned using Terraform modules in the `iac/` directory.
+   - Configure your AWS credentials
+
+      ```bash
+      export AWS_ACCESS_KEY_ID="<your-access-key-secret>"
+      export AWS_SECRET_ACCESS_KEY="<your-secret>"
+      export AWS_DEFAULT_REGION="<region-of-your-deployment>"
+      export SAGEMAKER_ENDPOINT_NAME="<tfvars-endpoint-name>"
+      ```
+
+   - run `terraform init` in the `iac/` folder.
+   - change `iac/tfvars/prod.tfvars` with your configurations.
+   - run `terraform apply --var-file=./tfvars/prod.tfvars` in the `iac/` folder for build the infrastructure in your aws account.
+
+2. **Data Upload**
+   - By default `/dataset/housing.csv` is loaded into s3 bucket. This action trigger the pipeline.
+   - **Optional**
+      - If you want after the first pipeline, you can upload raw California Housing data to the designated S3 data bucket.
+      - This triggers the ETL pipeline automatically for train a new model.
+
+3. **Model Training and Deployment**
+   - Once preprocessing is complete, the pipeline triggers SageMaker for training and deployment.
+   - The trained model is registered and deployed as an endpoint.
+
+4. **API**
+   - Use the provided API to make predictions.
+
+5. **Frontend** You can launch the frontend in different ways:
+
+   - **Docker:**
+      - Build the Docker image:
+
+         ```bash
+         docker build -t mlops-frontend ./frontend/src/
+         ```
+
+      - Or pull the prebuilt image from GitHub Container Registry:
+
+         ```bash
+         docker pull ghcr.io/umbertocicciaa/mlops-frontend:latest
+         ```
+
+      - Run the container:
+
+         ```bash
+         docker run -p 8501:8501 mlops-frontend
+         ```
+
+   - **Kubernetes:**
+      - Deploy using Helm chart:
+
+         ```bash
+         chmod u+x fe-helm
+         ./install.sh install
+         ```
+
+      - Or apply Kubernetes manifests directly:
+
+         ```bash
+         chmod u+x k8s/start.sh
+         ./start.sh
+         ```
+
+---
+
 ## Project Structure
 
 Project structure:
@@ -68,26 +136,6 @@ Project structure:
 
 4. **Frontend**
    - The [frontend](frontend/README.md) is built with Streamlit, allowing users to interact visually with the model and make predictions.
-
----
-
-## Getting Started
-
-1. **Infrastructure Deployment**
-   - All AWS resources are provisioned using Terraform modules in the `iac/` directory.
-   - Configure your AWS credentials and run `terraform init && terraform apply` in the `iac/` folder.
-
-2. **Data Upload**
-   - Upload raw California Housing data to the designated S3 data bucket.
-   - This triggers the ETL pipeline automatically.
-
-3. **Model Training and Deployment**
-   - Once preprocessing is complete, the pipeline triggers SageMaker for training and deployment.
-   - The trained model is registered and deployed as an endpoint.
-
-4. **API and Frontend**
-   - Use the provided API to make predictions.
-   - Launch the Streamlit frontend for visual interaction.
 
 ---
 
