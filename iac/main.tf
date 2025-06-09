@@ -190,7 +190,7 @@ data "aws_iam_policy_document" "glue_policy_list" {
 
 module "glue_iam_role" {
   source  = "cloudposse/iam-role/aws"
-  version = "0.21.0"
+  version = "0.22.0"
 
   name = "glue-iam-role"
   principals = {
