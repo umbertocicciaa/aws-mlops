@@ -115,6 +115,9 @@ Project structure:
   - **[umbertodomenico_ciccia_summary.pdf](docs/umbertodomenico_ciccia_summary.pdf)**: Project report (in Italian).
   - **[ciccia-assignement.pdf](docs/ciccia-assignement.pdf)**: Project assignement (in Italian).
 
+- **[clean-aws.sh](clean-aws.sh)**  
+   Scripts for delete not architectural elements from aws.
+
 ## Architecture
 
 1. **ETL Pipeline with AWS Glue**
