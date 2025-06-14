@@ -48,39 +48,44 @@ This project implements an end-to-end MLOps pipeline on AWS for the California H
 
 5. **Frontend** You can launch the frontend in different ways:
 
-   - **Docker:**
-      - Build the Docker image:
+   **Before launching the frontend, ensure that all required environment variables are properly set.**  
+   You can configure these variables in one of the following ways:
+   - By passing them directly to the Docker container using the `-e` flag.
+   - By specifying them in the Helm chart values or Kubernetes secrets/manifests when deploying on Kubernetes.
 
-         ```bash
-         docker build -t mlops-frontend ./frontend/src/
-         ```
+   **Docker:**
+   - Build the Docker image:
 
-      - Or pull the prebuilt image from GitHub Container Registry:
+      ```bash
+      docker build -t mlops-frontend ./frontend/src/
+      ```
 
-         ```bash
-         docker pull ghcr.io/umbertocicciaa/mlops-frontend:latest
-         ```
+     Or pull the prebuilt image from GitHub Container Registry:
 
-      - Run the container:
+      ```bash
+      docker pull ghcr.io/umbertocicciaa/mlops-frontend:latest
+      ```
 
-         ```bash
-         docker run -p 8501:8501 mlops-frontend
-         ```
+   - Run the container:
 
-   - **Kubernetes:**
-      - Deploy using Helm chart:
+      ```bash
+      docker run -p 8501:8501 mlops-frontend
+      ```
 
-         ```bash
-         chmod u+x fe-helm
-         ./install.sh install
-         ```
+   **Kubernetes:**
+   - Deploy using Helm chart:
 
-      - Or apply Kubernetes manifests directly:
+      ```bash
+      chmod u+x fe-helm
+      ./install.sh install
+      ```
 
-         ```bash
-         chmod u+x k8s/start.sh
-         ./start.sh
-         ```
+   - Or apply Kubernetes manifests directly:
+
+      ```bash
+      chmod u+x k8s/start.sh
+      ./start.sh
+      ```
 
 ---
 
