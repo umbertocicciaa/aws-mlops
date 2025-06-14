@@ -17,7 +17,7 @@ service:
   targetPort: 8501
 
 secrets:
-  awsAccessKeyId: ""
-  awsSecretAccessKey: ""
-  awsDefaultRegion: ""
-  sagemakerEndpointName: ""
+  awsAccessKeyId: "<your-access-key-id>"
+  awsSecretAccessKey: "<your-access-key>"
+  awsDefaultRegion: "<your-region>"
+  sagemakerEndpointName: "<ypur-sagemaker-endpoint-name>"
