@@ -37,7 +37,7 @@ input_data = {
 
 csv_input = f"{med_inc},{house_age},{avg_rooms},{avg_bedrooms},{population},{avg_occupancy},{latitude},{longitude}"
 
-print("Selected Input Features:", input_data["instances"][0])
+print("Input features received for prediction.")
 
 if st.button("Predict"):
     with st.spinner("Predicting..."):
