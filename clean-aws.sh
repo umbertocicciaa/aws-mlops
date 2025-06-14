@@ -1,6 +1,6 @@
 # Scripts to clean up AWS Model's resources created by the sagemaker.
 # You cant delete AWS Model's resources with terraform destroy because are not part ot the infrastructure.
-MODEL_PACKAGE_GROUP_NAME=""
+MODEL_PACKAGE_GROUP_NAME="<your-model-package-group-name>"
 
 for arn in $(aws sagemaker list-model-packages \
     --model-package-group-name "$MODEL_PACKAGE_GROUP_NAME" \
