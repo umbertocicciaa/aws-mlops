@@ -101,14 +101,12 @@ eventbridge_mlops_config = {
 # sagemaker
 sagemaker_config = {
   domain_name = "prod-sagemaker-domain"
-  vpc_id      = "vpc-066658188d6d6bfe4"
+  vpc_id      = "<your-vpc-id>"
   subnet_ids = [
-    "subnet-02a65d1a9763a0f8d",
-    "subnet-0cd0e0081738c41a5",
-    "subnet-0f1f4541c5a9f6354",
+    "<your-subnet-id>"
   ]
   security_group_ids = [
-    "sg-00418bacf55f318c5"
+    "<your-security-group-id>"
   ]
   user_profile_name = "prod-user-profile-admin"
 }
